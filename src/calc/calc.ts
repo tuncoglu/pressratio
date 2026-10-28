@@ -1,5 +1,6 @@
 import {
   ALKALINE,
+  ALKALINE_PUBLISHED_HYDRATION,
   BAKING_SODA_TO_CARBONATE,
   CALIBRATION,
   COLD_BELOW_C,
@@ -74,7 +75,8 @@ export function formatAmount(g: number, unit: Unit): string {
 
 export function round(n: number, digits = 0): number {
   const f = 10 ** digits;
-  return Math.round(n * f) / f;
+  // The nudge keeps 36.249999999999996 (float noise for 36.25) rounding the same way as 36.25.
+  return Math.round(n * f + Math.sign(n) * 1e-9) / f;
 }
 
 /** Water grams as kitchen teaspoons, to the nearest quarter: "½ tsp", "1¼ tsp". */
@@ -381,8 +383,15 @@ export function calculate(raw: CalcInput): CalcResult {
     flourTotalG * ALKALINE.addedWaterMin,
     flourTotalG * ALKALINE.addedWaterMax,
   ];
-  // The user's own added-water figure wins; otherwise start at the low end.
-  const addedWaterG = input.addedWaterG > 0 ? input.addedWaterG : suggestedAddedWaterG[0];
+  // Added water: the user's own figure wins; otherwise the calibrated target
+  // from their rated batches; otherwise start at the low end of the range.
+  const userWater = input.addedWaterG > 0;
+  const cal = !userWater ? (input.calibration ?? null) : null;
+  const addedWaterG = userWater
+    ? input.addedWaterG
+    : cal
+      ? Math.max(0, cal.target * flourTotalG - eggWater)
+      : suggestedAddedWaterG[0];
   const totalWaterG = eggWater + addedWaterG;
   const lyeUnvalidated = input.lyeWaterG > 0;
   const sodaG = lyeUnvalidated ? 0 : flourTotalG * ALKALINE.sodaFraction;
@@ -404,7 +413,7 @@ export function calculate(raw: CalcInput): CalcResult {
       label: 'Added water',
       grams: addedWaterG,
       pct: (addedWaterG / flourTotalG) * 100,
-      note: input.addedWaterG > 0 ? 'your amount' : 'start at the low end (10–17 %)',
+      note: userWater ? 'your amount' : cal ? 'your calibrated target' : 'start at the low end (10–17 %)',
     },
     { label: 'Salt', grams: saltG, pct: ALKALINE.saltFraction * 100 },
   ];
@@ -433,12 +442,14 @@ export function calculate(raw: CalcInput): CalcResult {
   }
 
   const hydration = totalWaterG / flourTotalG;
-  if (input.machine !== 'roller' && hydration > EXTRUDED_HYDRATION.max) {
+  if (input.machine !== 'roller' && !cal && hydration > EXTRUDED_HYDRATION.max) {
     const toExtrudedG = Math.max(0, EXTRUDED_HYDRATION.target * flourTotalG - eggWater);
+    const pub = ALKALINE_PUBLISHED_HYDRATION;
+    const where = hydration > pub.max ? 'above' : 'inside';
     warnings.push({
       id: 'alkaline-wet-for-press',
       level: 'info',
-      text: `This recipe sits at ${round(hydration * 100, 1)} % hydration, above the ${round(EXTRUDED_HYDRATION.min * 100, 1)}–${round(EXTRUDED_HYDRATION.max * 100, 1)} % band used for extruded dough. Reaching 30 % would mean only ≈ ${round(toExtrudedG)} g added water. How alkali shifts the right extrusion hydration is uncalibrated: add the water gradually and let the squeeze test decide.`,
+      text: `Published alkaline-noodle studies run ${round(pub.min * 100)}–${round(pub.max * 100)} % total water (Hatcher 1999; Edwards 1996, rolled noodles), and kansui tends to raise water absorption. This recipe is at ${round(hydration * 100, 1)} %, ${where} that range and above the ${round(EXTRUDED_HYDRATION.min * 100, 1)}–${round(EXTRUDED_HYDRATION.max * 100, 1)} % band used for pressed pasta. Reaching 30 % would mean only ≈ ${round(toExtrudedG)} g added water. What a press needs with alkali is uncalibrated: add the water gradually, let the squeeze test decide, and rate your batches so the app can learn your own target.`,
     });
   }
 
@@ -468,7 +479,7 @@ export function calculate(raw: CalcInput): CalcResult {
     uncalibrated,
     lyeUnvalidated,
     lyeAlkaliPct,
-    calibration: null,
+    calibration: cal,
     eggError: eggError(input.egg, eggShelledG, 1 / ALKALINE.eggFraction),
   };
 }

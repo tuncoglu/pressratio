@@ -196,6 +196,35 @@ describe('alkaline noodles', () => {
     expect(r.lyeUnvalidated).toBe(false);
   });
 
+  it('calibration sets the added water from the proven hydration', () => {
+    // 175 g egg -> 131.25 g egg water, 500 g flour; 32 % target = 160 g water -> 28.75 g added
+    const r = calculate({ ...alk, calibration: { target: 0.32, n: 3 } });
+    expect(r.addedWaterG).toBeCloseTo(28.75, 6);
+    expect(r.hydration).toBeCloseTo(0.32, 9);
+    expect(r.calibration).toEqual({ target: 0.32, n: 3 });
+    expect(r.ingredients.find((i) => i.label === 'Added water')!.note).toBe('your calibrated target');
+    expect(r.warnings.map((w) => w.id)).not.toContain('alkaline-wet-for-press');
+  });
+  it("the user's own added water beats calibration", () => {
+    const r = calculate({ ...alk, addedWaterG: 60, calibration: { target: 0.32, n: 3 } });
+    expect(r.addedWaterG).toBe(60);
+    expect(r.calibration).toBeNull();
+  });
+  it('a calibrated target below the egg water never goes negative', () => {
+    expect(calculate({ ...alk, calibration: { target: 0.2, n: 2 } }).addedWaterG).toBe(0);
+  });
+  it('alkaline batches calibrate separately from extruded ones', () => {
+    const mk = (id: string, mode: 'extruded' | 'alkaline', extra: number) => ({
+      id, createdAt: `2026-10-0${id}T10:00:00Z`, mode, machine: 'manual' as const, die: '', blend: BLEND_PRESETS[1].blend,
+      eggShelledG: 175, yolkG: 0, addedWaterG: 50, lyeWaterG: 0, ambientC: null, flourTotalG: 500, hydration: 0.3625,
+      restMinMin: 25, restMaxMin: 35, extraWaterG: extra, extraSemolinaG: 0, rating: 5, notes: '',
+    });
+    const key = { mode: 'alkaline' as const, machine: 'manual' as const, hasEgg: true, blend: BLEND_PRESETS[1].blend };
+    const batches = [mk('1', 'alkaline', 0), mk('2', 'alkaline', 10), mk('3', 'extruded', 40)];
+    const cal = calibrationFor(batches, key)!;
+    expect(cal.n).toBe(2);
+    expect(cal.target).toBeCloseTo((181.25 + 0.5 * 10) / 500, 9); // median of 0.3625 and 0.3825
+  });
   it('needs an egg weight', () => {
     expect(calculate({ ...alk, egg: { kind: 'shelled', value: 0 } }).status).toBe('empty');
   });
@@ -204,6 +233,10 @@ describe('alkaline noodles', () => {
     const r = calculate(alk); // 36.25 % hydration
     expect(r.hydration).toBeCloseTo(0.3625, 6);
     expect(r.warnings.map((w) => w.id)).toContain('alkaline-wet-for-press');
+    const text = r.warnings.find((w) => w.id === 'alkaline-wet-for-press')!.text;
+    expect(text).toContain('28–34 % total water');
+    expect(text).toContain('above that range');
+    expect(text).toContain('≈ 19 g added water');
     expect(calculate({ ...alk, machine: 'roller' }).warnings.map((w) => w.id)).not.toContain('alkaline-wet-for-press');
   });
 });

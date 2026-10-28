@@ -61,10 +61,10 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
 
   const egg = { kind: form.eggKind, value: form.eggValue, size: form.eggSize };
   const shelledG = eggToShelledG(egg);
-  // A personal target only exists for extruded dough with enough good batches.
+  // A personal target needs enough well-rated batches in the same mode.
   const cal = useMemo(
     () =>
-      form.mode === 'extruded'
+      form.mode === 'extruded' || form.mode === 'alkaline'
         ? calibrationFor(batches, {
             mode: form.mode,
             machine: form.machine,
@@ -268,7 +268,13 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
           unit={unit}
           suffix={unit}
           onChange={(v) => patch({ addedWaterG: v ?? 0 })}
-          hint={alkaline ? 'Leave empty to start at the low end (10 % of flour).' : undefined}
+          hint={
+            alkaline
+              ? cal && form.useCalibration
+                ? 'Leave empty to use your calibrated target.'
+                : 'Leave empty to start at the low end (10 % of flour).'
+              : undefined
+          }
         />
         {alkaline && (
           <>
@@ -480,7 +486,8 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
           <span>
             Use my calibrated target: {round(cal.target * 100, 1)} % hydration
             <span className="hint" style={{ display: 'block', fontWeight: 400 }}>
-              Median of {cal.n} batches rated 4+ with this machine, liquid and a similar flour blend. Default is 30 %.
+              Median of {cal.n} {alkaline ? 'alkaline ' : ''}batches rated 4+ with this machine, liquid and a similar flour
+              blend. {alkaline ? 'It sets the added water.' : 'Default is 30 %.'}
             </span>
           </span>
         </label>
@@ -591,15 +598,15 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
                     <tr>
                       <th>Ingredient</th>
                       <th>Amount</th>
-                      <th>% of flour</th>
+                      <th>% flour</th>
                     </tr>
                   </thead>
                   <tbody>
                     {r.ingredients.map((i) => (
                       <tr key={i.label}>
-                        <td style={{ whiteSpace: 'pre' }}>
-                          {i.label}
-                          {i.note && <small> — {i.note}</small>}
+                        <td className={i.label.startsWith('  ') ? 'indent' : undefined}>
+                          {i.label.trim()}
+                          {i.note && <small className="cell-note">{i.note}</small>}
                         </td>
                         <td>{formatAmount(i.grams, unit)}</td>
                         <td>{round(i.pct, 1)}</td>
@@ -607,7 +614,7 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
                     ))}
                   </tbody>
                 </table>
-                {r.suggestedAddedWaterG && (
+                {r.suggestedAddedWaterG && !r.calibration && (
                   <p className="hint">
                     Added water range: {formatAmount(r.suggestedAddedWaterG[0], unit)}–
                     {formatAmount(r.suggestedAddedWaterG[1], unit)} (10–17 % of flour). Start low.

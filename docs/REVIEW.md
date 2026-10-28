@@ -71,6 +71,10 @@ Cross-checked against `~/Projects/pasta_research`, `~/Projects/pasta-dies`, the 
 - **Bronze vs PTFE** (Bresciani 2022): bronze gives a rough, porous surface; PTFE gives a smooth, glossy one. Shown for the PTFE celentani die.
 - **Shipton's 00s are strong** (W 320–340, 13.5 % protein). A 00-heavy blend triggers the strong-blend note. Semolina-heavy blends (507, 12.5 %) don't.
 
+## Addendum: calibrating alkaline-dough hydration
+
+Published alkaline-noodle studies test **28–34 % total water** ([Hatcher et al. 1999](https://www.cerealsgrains.org/publications/cc/1999/July/Pages/76_4_566.aspx), [Edwards et al. 1996](https://www.cerealsgrains.org/publications/cc/backissues/1996/Documents/CC1996a144.html)); Edwards found those levels below the farinograph optimum. A [KU Leuven thesis](https://lirias.kuleuven.be/retrieve/286277) summarises kansui as raising water absorption. These are sheeted noodles, so nothing published fits a hand press. The app therefore shows the range as context and calibrates the actual pressing hydration from your rated batches (median of 4+ rated batches, same mode, machine, liquid type and similar blend), which sets the added water in alkaline mode.
+
 ## Kept as-is, with reasons
 - **0.75 egg water and 0.90 in-shell yield.** Within published ranges (USDA ~76 %; shell ~9–12 %, falling with egg size [16]). Precision beyond this is swamped by flour moisture.
 - **The 28.6–31.5 % band.** Consistent with the industrial and recipe evidence above. Users personalise it through calibration rather than through new constants.

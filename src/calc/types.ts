@@ -34,7 +34,7 @@ export interface CalcInput {
   machine: Machine;
   /** null = not entered, defaults to 20 C. */
   ambientC: number | null;
-  /** Use this personal target instead of the default (extruded mode only). */
+  /** Use this personal target instead of the default. In alkaline mode it sets the added water. */
   calibration?: Calibration | null;
 }
 

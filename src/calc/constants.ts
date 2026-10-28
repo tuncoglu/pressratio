@@ -30,6 +30,15 @@ export const ALKALINE = {
   addedWaterMax: 0.17,
 } as const;
 
+/**
+ * Total water as a fraction of flour used in published alkaline-noodle studies
+ * (28–34 %): Hatcher, Kruger & Anderson 1999, Cereal Chem 76:566; Edwards et
+ * al. 1996, Cereal Chem 73:708. Both sheeted noodles, not pressed dough, and
+ * Edwards found these levels below the farinograph optimum. Shown as context
+ * only; it does not drive any calculation.
+ */
+export const ALKALINE_PUBLISHED_HYDRATION = { min: 0.28, max: 0.34 } as const;
+
 export const DEFAULT_AMBIENT_C = 20;
 export const COLD_BELOW_C = 18;
 export const WARM_ABOVE_C = 26;

@@ -62,7 +62,8 @@ p { margin: 0.4rem 0; }
   align-items: center;
   gap: 12px;
 }
-.top h1 { font-size: 1.5rem; }
+.top h1 { font-size: 1.25rem; }
+.subtitle { margin: 2px 0 0; color: #fbf3e6; font-size: 0.9rem; }
 .tagline { margin: 0; color: #e9d3b0; font-style: italic; }
 
 .seg { display: flex; border: 2px solid #e9d3b0; border-radius: 10px; overflow: hidden; }
@@ -175,9 +176,13 @@ textarea { min-height: 72px; resize: vertical; }
 ul.plain { margin: 6px 0; padding-left: 1.2em; }
 ul.plain li { margin: 4px 0; }
 
-.bakers { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-.bakers th, .bakers td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line); }
-.bakers th:not(:first-child), .bakers td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+.bakers { width: 100%; border-collapse: collapse; font-size: 0.95rem; table-layout: fixed; }
+.bakers th, .bakers td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.bakers th:not(:first-child), .bakers td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bakers th:nth-child(2), .bakers td:nth-child(2) { width: 5.2em; }
+.bakers th:nth-child(3), .bakers td:nth-child(3) { width: 4.6em; }
+.bakers td.indent { padding-left: 1.2em; }
+.bakers .cell-note { display: block; color: var(--muted); font-size: 0.82rem; }
 
 details.adjust summary { font-weight: 700; font-size: 1.1rem; min-height: 44px; display: flex; align-items: center; cursor: pointer; }
 .squeeze-grid { display: grid; gap: 8px; margin: 8px 0; }

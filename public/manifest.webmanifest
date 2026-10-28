@@ -1,7 +1,7 @@
 {
-  "name": "PressRatio",
-  "short_name": "PressRatio",
-  "description": "Extrusion dough calculator for home pasta and noodle makers. Guidance, not guarantee.",
+  "name": "Pasta & Noodle Dough Calculator",
+  "short_name": "Pasta Dough",
+  "description": "Pasta and noodle dough calculator for hand presses, extruders and alkaline noodles. Guidance, not guarantee.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -99,7 +99,7 @@ Show the teaspoon equivalent (1 tsp ≈ 5 g, nearest quarter).
 ```
 hydrationReached = (eggWater + addedWater + extraWater) / (flour + extraSemolina)
 ```
-For the current mode + machine + liquid type (egg vs water-only) + similar blend (≤ 20 percentage points moved), take batches rated ≥ 4. If there are ≥ 2, offer their **median** hydration reached as the personal target (toggle, default on). Extruded mode only. A calibration supersedes the water-only placeholder.
+For the current mode + machine + liquid type (egg vs water-only) + similar blend (≤ 20 percentage points moved), take batches rated ≥ 4. If there are ≥ 2, offer their **median** hydration reached as the personal target (toggle, default on). Extruded and alkaline modes (separately). In alkaline mode the flour is fixed by the egg, so the target sets the added water (a user-typed amount wins). Show the published 28–34 % alkaline-noodle range as context until a calibration exists. A calibration supersedes the water-only placeholder.
 
 ### 5.5 Constants
 Every numeric constant lives in `constants.ts`, each with a source comment: given by this brief, derived (with source), or `// PLACEHOLDER — needs user calibration`. Placeholders get an "uncalibrated" badge in the UI. Current placeholders: water-only extrusion hydration (30 %), lye-water alkali fraction (0.25).

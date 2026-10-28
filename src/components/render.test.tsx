@@ -63,6 +63,26 @@ describe('render smoke tests', () => {
     expect(render(DEFAULT_FORM, 'g', good.slice(0, 1))).not.toContain('calibrated target');
   });
 
+  it('alkaline mode: published range note, then calibrated added water after two good batches', () => {
+    const alkForm = { ...DEFAULT_FORM, mode: 'alkaline' as const, eggValue: 175, blend: BLEND_PRESETS[1].blend };
+    const before = render(alkForm);
+    expect(before).toContain('28–34 % total water');
+    expect(before).not.toContain('calibrated target');
+    const alk = (id: string, day: string, extra: number): Batch => ({
+      ...mk(id, `2026-10-${day}T10:00:00Z`, extra, 5),
+      mode: 'alkaline', blend: BLEND_PRESETS[1].blend, eggShelledG: 175, addedWaterG: 50, flourTotalG: 500,
+    });
+    const out = render(alkForm, 'g', [alk('a1', '11', 0), alk('a2', '12', 0)]);
+    expect(out).toContain('Use my calibrated target: 36.3 % hydration');
+    expect(out).toContain('Median of 2 alkaline batches');
+    expect(out).not.toContain('28–34 % total water');
+    expect(out).toContain('your calibrated target');
+    expect(out).not.toContain('Start low');
+    // indentation is CSS, not preserved whitespace, so the label column can wrap
+    expect(out).not.toContain('white-space:pre');
+    expect(out).toContain('<td class="indent">Type 00</td>');
+  });
+
   it('egg count shows the size it assumes', () => {
     const out = render({ ...DEFAULT_FORM, eggKind: 'count', eggValue: 4, eggSize: 'euL' });
     expect(out).toContain('244 g shelled');

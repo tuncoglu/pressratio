@@ -21,7 +21,8 @@ export default function App() {
     <div className="app">
       <header className="top">
         <div>
-          <h1>PressRatio</h1>
+          <h1>Pasta &amp; Noodle Dough Calculator</h1>
+          <p className="subtitle">Hand-press, extruder and noodle recipes</p>
           <p className="tagline">Guidance, not guarantee.</p>
         </div>
         <div className="seg" role="radiogroup" aria-label="Units">

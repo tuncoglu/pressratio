@@ -1,6 +1,6 @@
-# PressRatio
+# Pasta & Noodle Dough Calculator (PressRatio)
 
-Extrusion dough calculator for home pasta and Asian noodle makers — manual presses (Bigolaro-style), electric extruders and rollers. **Guidance, not guarantee.**
+Live at https://pasta.sourdoughcalculator.uk. Dough calculator for home pasta and Asian noodle makers — manual presses (Bigolaro-style), electric extruders and rollers. **Guidance, not guarantee.**
 
 Offline-first, mobile-first PWA. No backend, no accounts, no analytics, no network calls at runtime. All state and batch logs live in `localStorage`; export/import as JSON.
 
@@ -64,7 +64,7 @@ Extruded semolina + egg:
 
 **Squeeze test:** crumbly → ready; powdery → add water ~1 % of flour (≈ 1 tsp per 500 g), rest 5–10 min, retest; sticky → add semolina ~2 % of flour (≈ 10 g per 500 g).
 
-**Calibration:** each batch records the extra water and semolina added, so the app knows the **hydration reached**. Once ≥ 2 batches rated 4+ share mode, machine, liquid type (egg vs water-only) and a similar blend (≤ 20 points apart), the calculator offers their median as your target.
+**Calibration (extruded and alkaline):** each batch records the extra water and semolina added, so the app knows the **hydration reached**. Once ≥ 2 batches rated 4+ share mode, machine, liquid type (egg vs water-only) and a similar blend (≤ 20 points apart), the calculator offers their median as your target. In alkaline mode the flour is fixed by the egg, so the target sets the **added water** (your own typed amount still wins). Until you have data, the app shows the published range for alkaline noodles, 28–34 % total water (Hatcher 1999; Edwards 1996; sheeted noodles, not pressed dough), as context only.
 
 Science review with sources: [`docs/REVIEW.md`](docs/REVIEW.md). Machine and die data: `src/data/bottene.ts`. Flour data: `src/data/flours.ts`. The corrected project brief: [`docs/BRIEF-v2.md`](docs/BRIEF-v2.md).
 
