@@ -98,3 +98,7 @@ Decisions the brief left open (simplest reasonable option chosen):
 - **Batch editing** covers date, die, quantities (incl. yolks and adjustments), rest range, ambient temperature, flour blend, rating and notes. Mode and machine are fixed once a batch is started.
 - Ounces are a display/input unit only; everything is stored and calculated in grams.
 - Service worker is hand-written (no PWA plugin) to keep dependencies minimal; it is registered only in production builds.
+
+## License
+
+[MIT](LICENSE)
