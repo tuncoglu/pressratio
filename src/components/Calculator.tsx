@@ -9,6 +9,7 @@ import {
   isStrongBlend,
   pressLoads,
   scaleForLoads,
+  sheetFor,
   eggFromShelledG,
   eggToShelledG,
   formatAmount,
@@ -28,6 +29,8 @@ import {
 } from '../data/bottene';
 import { flourById, floursFor } from '../data/flours';
 import { ALKALI_HANDLING_NOTE, CARE_NOTE, DIES, LYE_NOTE, MACHINES, MODE_OPTIONS, PRESS_TIPS } from '../data/profiles';
+import { ROLL_SHAPES, ROLL_TIPS, type RollShape } from '../data/rolled';
+import { SHEET_REF_CM } from '../calc/constants';
 import type { FormState } from '../storage';
 import { BlendEditor } from './BlendEditor';
 import { Uncalibrated, UncalibratedList, Unvalidated } from './Bits';
@@ -64,7 +67,7 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
   // A personal target needs enough well-rated batches in the same mode.
   const cal = useMemo(
     () =>
-      form.mode === 'extruded' || form.mode === 'alkaline'
+      form.mode === 'extruded' || form.mode === 'alkaline' || form.mode === 'rolled'
         ? calibrationFor(batches, {
             mode: form.mode,
             machine: form.machine,
@@ -90,6 +93,14 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
     [form, cal],
   );
   const alkaline = form.mode === 'alkaline';
+  const rolled = form.mode === 'rolled';
+  const shape = ROLL_SHAPES[form.rollShape];
+
+  // Rolled dough uses a pin or pasta roller; pressed dough a press or extruder.
+  const withMode = (mode: Mode): Partial<FormState> => {
+    if (mode === 'rolled') return { mode, machine: form.machine === 'roller' ? 'roller' : 'pin' };
+    return { mode, machine: form.machine === 'pin' ? 'manual' : form.machine };
+  };
 
   const dieOptions: Die[] =
     form.machine === 'manual'
@@ -167,7 +178,7 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
       createdAt: new Date().toISOString(),
       mode: form.mode,
       machine: form.machine,
-      die: form.die,
+      die: rolled ? `${shape.short} ${shape.thicknessMm} mm` : form.die,
       blend: form.blend,
       eggShelledG: r.eggShelledG,
       yolkG: r.yolkG,
@@ -203,7 +214,7 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
                 name="mode"
                 checked={form.mode === m.id}
                 disabled={m.disabled}
-                onChange={() => patch({ mode: m.id as Mode })}
+                onChange={() => patch(withDieFor(withMode(m.id as Mode)))}
               />
               {m.label}
             </label>
@@ -355,7 +366,56 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
         )}
       </fieldset>
 
+      {/* ---- Rolling (rolled mode) ---- */}
+      {rolled && (
+        <fieldset className="card">
+          <legend>Rolling</legend>
+          <div className="field">
+            <label htmlFor="roll-tool">Rolling with</label>
+            <select
+              id="roll-tool"
+              value={form.machine}
+              onChange={(e) => patch({ machine: e.target.value as FormState['machine'] })}
+            >
+              {(['pin', 'roller'] as const).map((id) => (
+                <option key={id} value={id}>
+                  {MACHINES[id].label}
+                </option>
+              ))}
+            </select>
+            <p className="hint">{MACHINES[form.machine].note}</p>
+          </div>
+          <div className="field">
+            <label htmlFor="roll-shape">Shape</label>
+            <select
+              id="roll-shape"
+              value={form.rollShape}
+              onChange={(e) => patch({ rollShape: e.target.value as RollShape })}
+            >
+              {Object.entries(ROLL_SHAPES).map(([id, s]) => (
+                <option key={id} value={id}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+            <p className="hint">
+              Roll to about {shape.thicknessMm} mm (range {shape.rangeMm[0]}–{shape.rangeMm[1]} mm). {shape.note}
+            </p>
+            {shape.cuts && <p className="hint">Cut widths: {shape.cuts.join(' · ')}.</p>}
+          </div>
+          <NumField
+            label="Ambient temperature (°C) — optional"
+            value={form.ambientC}
+            nullable
+            suffix="°C"
+            placeholder="20"
+            onChange={(v) => patch({ ambientC: v })}
+          />
+        </fieldset>
+      )}
+
       {/* ---- Machine ---- */}
+      {!rolled && (
       <fieldset className="card">
         <legend>Machine</legend>
         <div className="field">
@@ -365,11 +425,13 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
             value={form.machine}
             onChange={(e) => patch(withDieFor({ machine: e.target.value as FormState['machine'] }))}
           >
-            {Object.entries(MACHINES).map(([id, m]) => (
-              <option key={id} value={id}>
-                {m.label}
-              </option>
-            ))}
+            {Object.entries(MACHINES)
+              .filter(([id]) => id !== 'pin')
+              .map(([id, m]) => (
+                <option key={id} value={id}>
+                  {m.label}
+                </option>
+              ))}
           </select>
           <p className="hint">{MACHINES[form.machine].note}</p>
         </div>
@@ -457,8 +519,20 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
           onChange={(v) => patch({ ambientC: v })}
         />
       </fieldset>
+      )}
 
-      {form.machine !== 'roller' && (
+      {rolled && (
+        <div className="note">
+          <strong>Before you roll</strong>
+          <ul>
+            {ROLL_TIPS.map((t) => (
+              <li key={t}>{t}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {!rolled && form.machine !== 'roller' && (
         <div className="note">
           <strong>Before you press</strong>
           <ul>
@@ -486,8 +560,9 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
           <span>
             Use my calibrated target: {round(cal.target * 100, 1)} % hydration
             <span className="hint" style={{ display: 'block', fontWeight: 400 }}>
-              Median of {cal.n} {alkaline ? 'alkaline ' : ''}batches rated 4+ with this machine, liquid and a similar flour
-              blend. {alkaline ? 'It sets the added water.' : 'Default is 30 %.'}
+              Median of {cal.n} {alkaline ? 'alkaline ' : rolled ? 'rolled ' : ''}batches rated 4+ with this{' '}
+              {rolled ? 'tool' : 'machine'}, liquid and a similar flour blend.{' '}
+              {alkaline ? 'It sets the added water.' : rolled ? 'Default is 37.5 %.' : 'Default is 30 %.'}
             </span>
           </span>
         </label>
@@ -516,6 +591,8 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
               )}
             </div>
             {r.eggError && <EggPrecision err={r.eggError} unit={unit} onWeigh={weighInstead} />}
+
+            {rolled && <SheetInfo doughG={dough} thicknessMm={shape.thicknessMm} unit={unit} shapeLabel={shape.short} />}
 
             {press && loads && (
               <div className="precision precision-loads">
@@ -556,6 +633,7 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
                 <dt>
                   Hydration (water ÷ flour){r.calibration && <> <span className="badge badge-ok">your target</span></>}
                   {r.uncalibrated.includes('WATER_ONLY_HYDRATION') && <> <Uncalibrated id="WATER_ONLY_HYDRATION" /></>}
+                  {r.uncalibrated.includes('ROLLED_HYDRATION') && <> <Uncalibrated id="ROLLED_HYDRATION" /></>}
                 </dt>
                 <dd>
                   {round(r.hydration * 100, 1)} %
@@ -577,7 +655,9 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
               it varies with storage, so the squeeze test has the final say.
             </p>
 
-            <h3>Rest</h3>
+            <h3>
+              Rest{r.uncalibrated.includes('ROLLED_REST') && <> <Uncalibrated id="ROLLED_REST" /></>}
+            </h3>
             <p className="rest">
               <strong>
                 {r.rest.minMin}–{r.rest.maxMin} min
@@ -630,11 +710,12 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
 
       {/* ---- Adjust / squeeze test ---- */}
       <details className="card adjust">
-        <summary>Adjust — squeeze test</summary>
+        <summary>{rolled ? 'Adjust — knead test' : 'Adjust — squeeze test'}</summary>
         <SqueezeTest
           state={squeeze}
           onState={setSqueeze}
           unit={unit}
+          mode={form.mode}
           flourG={r.status === 'ok' ? r.flourTotalG : 500}
           activeBatch={activeBatch}
           onLogAdjust={onLogAdjust}
@@ -655,6 +736,33 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
           </p>
         )}
       </div>
+    </div>
+  );
+}
+
+/** How big the rolled dough gets at the target thickness. */
+function SheetInfo({
+  doughG,
+  thicknessMm,
+  unit,
+  shapeLabel,
+}: {
+  doughG: number;
+  thicknessMm: number;
+  unit: Unit;
+  shapeLabel: string;
+}) {
+  const s = sheetFor(doughG, thicknessMm);
+  if (s.areaCm2 <= 0) return null;
+  return (
+    <div className="precision precision-loads">
+      <p>
+        <strong>
+          {formatAmount(doughG, unit)} dough → about {round(s.sheets, 1)} sheets of {SHEET_REF_CM} × {SHEET_REF_CM} cm
+        </strong>{' '}
+        at {thicknessMm} mm ({shapeLabel.toLowerCase()}), about {round(s.areaCm2 / 100)} dm² in all. Roll it in portions
+        you can handle with your pin and keep the rest wrapped. <Uncalibrated id="DOUGH_DENSITY" />
+      </p>
     </div>
   );
 }

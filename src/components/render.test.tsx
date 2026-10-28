@@ -49,10 +49,9 @@ describe('render smoke tests', () => {
     expect(out).toContain('unvalidated');
   });
 
-  it('roller + extruded shows a warning; rolled option is disabled', () => {
+  it('roller + extruded shows a warning', () => {
     const out = render({ ...DEFAULT_FORM, machine: 'roller' });
     expect(out).toContain('not for extruded dough');
-    expect(out).toMatch(/disabled=""[^>]*>|<input[^>]*disabled/);
   });
 
   it('offers a calibrated target once two matching batches are rated 4+', () => {
@@ -81,6 +80,51 @@ describe('render smoke tests', () => {
     // indentation is CSS, not preserved whitespace, so the label column can wrap
     expect(out).not.toContain('white-space:pre');
     expect(out).toContain('<td class="indent">Type 00</td>');
+  });
+
+  it('rolled mode: pin, shape, sheet size, knead test, no press UI', () => {
+    const form = { ...DEFAULT_FORM, mode: 'rolled' as const, machine: 'pin' as const };
+    const out = render(form);
+    expect(out).toContain('Rolled egg pasta (ribbons, ravioli, lasagne)');
+    expect(out).not.toContain('Rolled egg pasta (coming soon)');
+    expect(out).toContain('<legend>Rolling</legend>');
+    expect(out).toContain('Rolling pin');
+    expect(out).toContain('Ribbons (tagliatelle, fettuccine, pappardelle)');
+    expect(out).toContain('Roll to about 1 mm (range 0.8–1.2 mm)');
+    expect(out).toContain('Tagliolini 3.5 mm');
+    // 210 g egg -> 420 g flour at 37.5 %; dough 630 g
+    expect(out).toContain('420 g');
+    expect(out).toContain('37.5 %');
+    expect(out).toContain('630 g dough → about 3.6 sheets of 40 × 40 cm');
+    expect(out).toContain('Rest <span class="badge badge-warn"');
+    expect(out).toContain('60–75 min');
+    expect(out).toContain('Before you roll');
+    expect(out).toContain('Adjust — knead test');
+    expect(out).toContain('Smooth and firm');
+    // pressed-dough UI is gone
+    expect(out).not.toContain('Before you press');
+    expect(out).not.toContain('Bigolaro model');
+    expect(out).not.toContain('Care note');
+    expect(out).not.toContain('dough = ');
+    expect(out).toContain('An all-coarse-semolina dough is slow to hydrate');
+  });
+
+  it('rolled mode: lasagne and ravioli thicknesses follow the shape', () => {
+    const f = { ...DEFAULT_FORM, mode: 'rolled' as const, machine: 'pin' as const };
+    expect(render({ ...f, rollShape: 'ravioli' })).toContain('Roll to about 0.8 mm');
+    expect(render({ ...f, rollShape: 'lasagne' })).toContain('Sources disagree');
+  });
+
+  it('rolled mode offers a calibrated target from rolled batches only', () => {
+    const f = { ...DEFAULT_FORM, mode: 'rolled' as const, machine: 'pin' as const };
+    const rb = (id: string, day: string, extra: number): Batch => ({
+      ...mk(id, `2026-10-${day}T10:00:00Z`, extra, 5),
+      mode: 'rolled', machine: 'pin', flourTotalG: 420, hydration: 0.375,
+    });
+    const out = render(f, 'g', [rb('r1', '11', 0), rb('r2', '12', 0), mk('x', '2026-10-13T10:00:00Z', 5, 5)]);
+    expect(out).toContain('Median of 2 rolled batches');
+    expect(out).toContain('37.5 % hydration');
+    expect(render(f, 'g', [mk('x', '2026-10-13T10:00:00Z', 5, 5)])).not.toContain('calibrated target');
   });
 
   it('egg count shows the size it assumes', () => {

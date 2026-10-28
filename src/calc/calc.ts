@@ -18,7 +18,11 @@ import {
   MIN_WATER_STEP_G,
   POWDERY_RETEST_REST_MIN,
   REST,
+  ROLLED_HYDRATION,
+  ROLLED_REST,
   SCALE_RESOLUTION_G,
+  SHEET_REF_CM,
+  DOUGH_DENSITY,
   STRONG_BLEND_PROTEIN,
   SEMOLINA_STEP_FRACTION,
   TSP_WATER_G,
@@ -219,15 +223,29 @@ export function holdLimitH(ambientC: number | null): number {
  * rest scales continuously with the coarse share instead of jumping at a
  * threshold. The endpoints match the brief: 100 % coarse = 30, 0 % = 20.
  */
-export function restPlan(blend: Blend, ambientC: number | null): RestPlan {
+export function restPlan(blend: Blend, ambientC: number | null, mode: Mode = 'extruded'): RestPlan {
   const t = ambientC ?? DEFAULT_AMBIENT_C;
   const coarseShare = Math.min(1, Math.max(0, blend.coarseSemolina / 100));
-  let base = REST.otherBaseMin + (REST.coarseBaseMin - REST.otherBaseMin) * coarseShare;
+  const rolled = mode === 'rolled';
+  let base = rolled
+    ? ROLLED_REST.baseMin + ROLLED_REST.coarseExtraMin * coarseShare
+    : REST.otherBaseMin + (REST.coarseBaseMin - REST.otherBaseMin) * coarseShare;
   base = Math.round(base / REST.roundToMin) * REST.roundToMin;
   if (t < COLD_BELOW_C) base += REST.coldExtraMin;
   if (t > WARM_ABOVE_C) base -= REST.warmLessMin;
   const hold = holdLimitH(ambientC);
-  const notes = [
+  const holdNote =
+    hold === HOLD_LIMIT.hotH
+      ? `It is above ${HOLD_LIMIT.hotAboveC} °C: raw-egg dough should spend no more than ${hold} hour unrefrigerated in total (USDA). Refrigerate it wrapped if holding longer, then let it come back to room temperature before rolling.`
+      : `If you will hold the dough longer than ${hold} hours in total (raw egg, USDA guidance), refrigerate it wrapped, then let it come back to room temperature before rolling.`;
+  const notes = rolled
+    ? [
+        'Knead until smooth (about 8–10 minutes by hand), then wrap tightly and rest at room temperature. Wrapping stops a dry skin forming.',
+        'Coarse semolina hydrates slowly and feels dry and gritty at first. Judge the dough after the rest, not before. If it is still shaggy, add water in small steps and knead again.',
+        'If the sheet keeps springing back while you roll, the gluten is tight: cover it and rest 5–10 minutes. A longer rest (Sirman: hours, chilled) makes sheets stretchier.',
+        holdNote,
+      ]
+    : [
     'Rest covered, at room temperature. Covering stops the crumbs drying out; chilling would slow the water uptake the rest is for, so never refrigerate a short rest.',
     'Coarse semolina hydrates slowly (bigger particles take longer to wet through). If it is still powdery after the rest, add water in small steps and rest 5–10 min.',
     hold === HOLD_LIMIT.hotH
@@ -235,7 +253,8 @@ export function restPlan(blend: Blend, ambientC: number | null): RestPlan {
       : `If you will hold the mix longer than ${hold} hours in total (raw egg, USDA guidance), refrigerate it covered, then temper 20–30 min before loading the press.`,
     'Never load cold dough into a manual press: cold dough is stiffer and much harder to push through the die.',
   ];
-  return { minMin: base, maxMin: base + REST.spanMin, coarseShare, holdLimitH: hold, notes };
+  const span = rolled ? ROLLED_REST.spanMin : REST.spanMin;
+  return { minMin: base, maxMin: base + span, coarseShare, holdLimitH: hold, notes };
 }
 
 // ---- Main calculation --------------------------------------------------
@@ -245,6 +264,8 @@ export const TEXTURE_TARGETS = {
     'Damp sand — should clump when squeezed, not form a smooth ball. Slightly crumbly is fine; powdery is not.',
   alkaline:
     'Stiff, shaggy crumbs that press together into a firm dough. Expect it to look drier than a hand-rolled noodle dough.',
+  rolled:
+    'A smooth, firm ball that springs back slowly when pressed: slightly tacky but not sticky. Coarse semolina can look rough and feel dry until it has rested.',
 } as const;
 
 function emptyResult(input: CalcInput, status: CalcResult['status'], message: string): CalcResult {
@@ -266,7 +287,7 @@ function emptyResult(input: CalcInput, status: CalcResult['status'], message: st
     hydration: 0,
     hydrationRange: [0, 0],
     textureTarget: '',
-    rest: restPlan(input.blend, input.ambientC),
+    rest: restPlan(input.blend, input.ambientC, input.mode),
     ingredients: [],
     suggestedAddedWaterG: null,
     warnings: [],
@@ -296,9 +317,6 @@ export function calculate(raw: CalcInput): CalcResult {
     lyeWaterG: raw.mode === 'alkaline' ? sanitize(raw.lyeWaterG) : 0,
   };
 
-  if (input.mode === 'rolled') {
-    return emptyResult(input, 'unsupported', 'Rolled egg pasta is coming soon.');
-  }
   if (!isValidBlend(input.blend)) {
     return emptyResult(input, 'invalid-blend', 'Flour blend must add up to 100 %.');
   }
@@ -308,7 +326,16 @@ export function calculate(raw: CalcInput): CalcResult {
   const eggWater = eggWaterG(eggShelledG, input.yolkG);
   const warnings: Warning[] = [];
   const uncalibrated: string[] = [];
-  const rest = restPlan(input.blend, input.ambientC);
+  const rolled = input.mode === 'rolled';
+  const rest = restPlan(input.blend, input.ambientC, input.mode);
+
+  if (rolled && rest.coarseShare >= 0.9) {
+    warnings.push({
+      id: 'rolled-all-coarse',
+      level: 'info',
+      text: 'An all-coarse-semolina dough is slow to hydrate and can roll out gritty and tough with a pin. Expect the long end of the rest, and consider blending in some 00 if sheets tear or spring back (home-cook consensus, not tested here).',
+    });
+  }
 
   if (input.yolkG > 0) {
     warnings.push({
@@ -318,23 +345,28 @@ export function calculate(raw: CalcInput): CalcResult {
     });
   }
 
-  if (input.mode === 'extruded') {
+  if (input.mode === 'extruded' || rolled) {
     const totalWaterG = eggWater + input.addedWaterG;
     if (totalWaterG <= 0) {
       return emptyResult(input, 'empty', 'Enter an egg weight or some added water.');
     }
     // Egg dough uses the brief's model; water-only dough uses a placeholder.
     // A personal calibration from the batch log replaces either.
-    const base = allEggG > 0 ? EXTRUDED_HYDRATION : WATER_ONLY_HYDRATION;
+    const base = rolled ? ROLLED_HYDRATION : allEggG > 0 ? EXTRUDED_HYDRATION : WATER_ONLY_HYDRATION;
     const cal = input.calibration ?? null;
     const target = cal ? cal.target : base.target;
     const h = { target, min: target - (base.target - base.min), max: target + (base.max - base.target) };
-    if (allEggG <= 0 && !cal) uncalibrated.push('WATER_ONLY_HYDRATION');
+    if (rolled) {
+      uncalibrated.push('ROLLED_REST');
+      if (!cal) uncalibrated.push('ROLLED_HYDRATION');
+    } else if (allEggG <= 0 && !cal) {
+      uncalibrated.push('WATER_ONLY_HYDRATION');
+    }
 
     const flourTotalG = totalWaterG / h.target;
     const flourRangeG: [number, number] = [totalWaterG / h.max, totalWaterG / h.min];
 
-    if (input.machine === 'roller') {
+    if (input.machine === 'roller' && !rolled) {
       warnings.push({
         id: 'roller-extruded',
         level: 'warn',
@@ -357,7 +389,7 @@ export function calculate(raw: CalcInput): CalcResult {
       flourBreakdownG: breakdown(input.blend, flourTotalG),
       hydration: totalWaterG / flourTotalG,
       hydrationRange: [h.min, h.max],
-      textureTarget: TEXTURE_TARGETS.extruded,
+      textureTarget: rolled ? TEXTURE_TARGETS.rolled : TEXTURE_TARGETS.extruded,
       rest,
       ingredients: [],
       suggestedAddedWaterG: null,
@@ -484,6 +516,15 @@ export function calculate(raw: CalcInput): CalcResult {
   };
 }
 
+// ---- Sheets (rolled dough) ---------------------------------------------
+
+/** Sheet area for a dough weight at a thickness, and how many reference sheets that is. */
+export function sheetFor(doughG: number, thicknessMm: number): { areaCm2: number; sheets: number; sideCm: number } {
+  if (doughG <= 0 || thicknessMm <= 0) return { areaCm2: 0, sheets: 0, sideCm: 0 };
+  const areaCm2 = doughG / (DOUGH_DENSITY * (thicknessMm / 10));
+  return { areaCm2, sheets: areaCm2 / SHEET_REF_CM ** 2, sideCm: Math.sqrt(areaCm2) };
+}
+
 // ---- Dough, press loads, flours ----------------------------------------
 
 /** Everything that goes into the press, grams. */
@@ -551,9 +592,37 @@ export function adjustSteps(flourG: number): { waterG: number; semolinaG: number
  * Next action for a squeeze-test result. `flourG` sizes the correction; the
  * brief's ~500 g reference batch gives ~1 tsp water and ~10 g semolina.
  */
-export function squeezeAdvice(state: SqueezeState, flourG = 500): SqueezeAdvice {
+export function squeezeAdvice(state: SqueezeState, flourG = 500, mode: Mode = 'extruded'): SqueezeAdvice {
   const [restLo, restHi] = POWDERY_RETEST_REST_MIN;
   const steps = adjustSteps(flourG);
+  if (mode === 'rolled') {
+    // Knead test: kneaded for several minutes and rested ~5 min (semolina feels dry at first).
+    switch (state) {
+      case 'crumbly':
+        return {
+          state,
+          verdict: 'ready',
+          title: 'Smooth, firm, barely tacky',
+          action: 'Ready. Wrap it and rest, then roll.',
+        };
+      case 'powdery':
+        return {
+          state,
+          verdict: 'add-water',
+          title: "Dry and shaggy, won't come together",
+          action: `Rest it ${restLo} minutes first (semolina feels dry until it hydrates). If still shaggy, knead in water ${round(steps.waterG, 1)} g (≈ ${formatTsp(steps.waterG)}) at a time.`,
+          waterStepG: steps.waterG,
+        };
+      case 'sticky':
+        return {
+          state,
+          verdict: 'add-semolina',
+          title: 'Sticky: clings to hands and board',
+          action: `Too wet to roll. Knead in flour ${steps.semolinaG} g at a time, dusting with semolina.`,
+          semolinaStepG: steps.semolinaG,
+        };
+    }
+  }
   switch (state) {
     case 'crumbly':
       return {

@@ -1,5 +1,5 @@
 export type Mode = 'extruded' | 'alkaline' | 'rolled';
-export type Machine = 'manual' | 'electric' | 'roller';
+export type Machine = 'manual' | 'electric' | 'roller' | 'pin';
 export type FlourKey = 'type00' | 'fineSemolina' | 'coarseSemolina' | 'breadFlour';
 /** Whole-number percentages that sum to 100. */
 export type Blend = Record<FlourKey, number>;

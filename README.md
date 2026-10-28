@@ -58,6 +58,8 @@ Extruded semolina + egg:
 
 **Flours:** each blend slot takes a specific flour. Shipton Mill's 00 (118, 120), semolina (507) and bread flours (105, 102, 112, 101) carry protein, W, P/L and ash from Shipton's specs (via the SourDough project). The blend shows share-weighted protein and W, and blends at ≥ 13.5 % protein get a "strong blend" note. These figures inform; they don't change the hydration maths, since calibration captures their effect.
 
+**Rolled egg pasta** (ribbons, ravioli, lasagne; by pin or pasta roller): the same water-fraction model with a wetter target, **37.5 %**, which is the classic 1 large egg (50 g shelled) per 100 g flour. Hand-rolling can't compact dough the way a machine does, so it runs wetter than Sirman's machine-kneaded sheet doughs (28–33 %), and hand recipes in the wild span 37–50 %. The band (35–42 %) is a guess until you calibrate. Rest is 30 min for plain egg dough, rising to 60 min for all-coarse-semolina dough because coarse particles hydrate slowly; a knead test replaces the squeeze test ("rest 5 minutes before adding water", because semolina feels dry at first). The result also shows how big the sheet gets: dough weight ÷ (density × thickness), with thickness per shape (ribbons ~1 mm, ravioli ~0.8 mm, lasagne ~1 mm) and cut widths from Bottene's die catalogue.
+
 **Asian alkaline noodles** are a reference recipe scaled linearly from the egg weight, shown with baker's percentages: egg 35 %, baked baking soda (sodium carbonate) 1.5 %, salt 0.7 %, added water 10–17 % (starts at 10 %) — all of flour weight. The pre-bake baking-soda weight is shown (÷ 0.631). Entering lye water replaces the baked soda; the app estimates its alkali content from a placeholder and flags it **unvalidated**. With a press, the app also notes that this recipe (36–43 %) is wetter than the extrusion band.
 
 **Rest time:** base = 20 + 10 × coarse-semolina share, rounded to 5 min; +10 below 18 °C; −5 above 26 °C; range = base … base + 10. Hold limit for raw-egg dough: 2 h, or 1 h above 32 °C (USDA).
@@ -76,6 +78,10 @@ Shown in the UI with an "uncalibrated" badge wherever they affect a result.
 | --- | --- | --- |
 | `WATER_ONLY_HYDRATION` | 30 % (28.6–31.5 %) | Water-only extrusion hydration; copied from the egg model. Replaced automatically once you have ≥ 2 well-rated water-only batches |
 | `LYE_WATER_CARBONATE_FRACTION` | 0.25 | Alkali per gram of bottled lye water; brands don't publish it |
+| `ROLLED_HYDRATION` | 37.5 % (35–42 %) | Published figures span 28–50 %; replaced by your calibrated target |
+| `ROLLED_REST` | 30 min, up to 60 for all-coarse semolina | Cook-blog consensus, not measured |
+| `DOUGH_DENSITY` | 1.1 g/cm³ | Only converts dough weight to sheet area |
+| Roll thicknesses (`src/data/rolled.ts`) | ribbons 1, ravioli 0.8, lasagne 1 mm | Sources disagree, especially for lasagne (0.5–1 mm) |
 
 ## Assumptions
 
@@ -92,6 +98,7 @@ Decisions the brief left open (simplest reasonable option chosen):
 - **Batch delta** compares with the most recent earlier batch of the *same mode*.
 - **Import** merges by batch id (imported copy wins) rather than replacing the log; unreadable entries are skipped and counted; fields missing from older exports default to 0.
 - **Machine / die profiles** are seed data in `src/data/bottene.ts` and `src/data/profiles.ts` (edit the files to change them); there is no in-app editor. Die can be any free text via "Custom…".
+- **Rolled mode** treats the rolling pin as the default tool and the pasta roller as an option. Switching modes swaps the machine between press/extruder and pin/roller. Rolled batches store the shape and thickness in the die field and calibrate separately from pressed ones. The 40 × 40 cm "sheet" is only a display unit for how much dough you have.
 - **Bigolaro capacity** ("capacità pasta") is treated as dough mass per load. Crumbly dough is bulkier until packed, so a load may need topping up as you press.
 - **"Bottoni-style"** in the original brief is read as Bottene (maker of both the Bigolaro and the Lillodue/PM electric extruders).
 - **Flour identity** is stored on each batch but isn't part of the calibration key (blend similarity is). Mixing 118 and 120 in your history is unlikely to matter; switching to a very different flour will show up as a blend change only if the slot changes.

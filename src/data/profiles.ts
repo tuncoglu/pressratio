@@ -5,7 +5,7 @@ import type { Machine, Mode } from '../calc/types';
 export const MODE_OPTIONS: { id: Mode; label: string; disabled?: boolean }[] = [
   { id: 'extruded', label: 'Extruded semolina + egg' },
   { id: 'alkaline', label: 'Asian alkaline noodles (00 + semolina)' },
-  { id: 'rolled', label: 'Rolled egg pasta (coming soon)', disabled: true },
+  { id: 'rolled', label: 'Rolled egg pasta (ribbons, ravioli, lasagne)' },
 ];
 
 export const MODE_SHORT: Record<Mode, string> = {
@@ -24,8 +24,12 @@ export const MACHINES: Record<Machine, { label: string; note: string }> = {
     note: 'Slightly more forgiving than a manual press, but still wants crumbly input.',
   },
   roller: {
-    label: 'Roller',
-    note: 'Not for extruded dough. Use for the (coming soon) rolled-pasta mode.',
+    label: 'Pasta roller',
+    note: 'Not for extruded dough. Use it for rolled pasta.',
+  },
+  pin: {
+    label: 'Rolling pin',
+    note: 'A long, completely flat pin gives the most even sheets. Hand-rolling cannot compact dough, so it needs more water than a machine.',
   },
 };
 

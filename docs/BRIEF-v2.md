@@ -29,7 +29,7 @@ Key insight: **"1 egg per 100 g flour" is wrong for extrusion.** Extruder dough 
 
 ### Screen 1: Calculator
 Inputs:
-- **Mode**: `Extruded semolina + egg` | `Asian alkaline noodles (00 + semolina)` | `Rolled egg pasta (coming soon — disabled)`
+- **Mode**: `Extruded semolina + egg` | `Asian alkaline noodles (00 + semolina)` | `Rolled egg pasta` **[v2] (ribbons, ravioli, lasagne; by rolling pin or pasta roller)**
 - **Liquid**: shelled egg weight *or* number of eggs **[v2] + egg size (US large ≈ 50 g, EU M ≈ 52 g, EU L ≈ 61 g, EU XL ≈ 67 g shelled)** *or* in-shell weight; **[v2] optional extra yolks (g)**; optional added water; optional lye water (alkaline only)
 - **Flour blend**: `type 00`, `fine semolina`, `coarse semolina`, `bread flour`, always summing to 100 % (sliders rebalance the others). Presets: `100 % coarse semolina`, `70 % 00 / 30 % coarse`, `50/50`.
 - **Machine**: `Manual press (Bigolaro-style)` | `Electric extruder (Bottene Lillodue / PM)` | `Roller`
@@ -103,6 +103,9 @@ For the current mode + machine + liquid type (egg vs water-only) + similar blend
 
 ### 5.5 Constants
 Every numeric constant lives in `constants.ts`, each with a source comment: given by this brief, derived (with source), or `// PLACEHOLDER — needs user calibration`. Placeholders get an "uncalibrated" badge in the UI. Current placeholders: water-only extrusion hydration (30 %), lye-water alkali fraction (0.25).
+
+### 5.6 [v2] Rolled egg pasta
+Same water-fraction model, target **37.5 %** (1 large egg per 100 g flour), band 35–42 %, all marked PLACEHOLDER (published figures span 28–50 %; machine-kneaded dough runs lower than hand-rolled). Rest 30 min, rising to 60 min for all-coarse-semolina dough. A knead test replaces the squeeze test (rest 5 min before adding water; add flour if sticky). Show sheet area from dough weight, density and thickness per shape. Calibrates from rated rolled batches like the other modes.
 
 ## 6. Rest-time logic
 ```

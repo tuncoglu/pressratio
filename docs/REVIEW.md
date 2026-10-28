@@ -75,6 +75,16 @@ Cross-checked against `~/Projects/pasta_research`, `~/Projects/pasta-dies`, the 
 
 Published alkaline-noodle studies test **28–34 % total water** ([Hatcher et al. 1999](https://www.cerealsgrains.org/publications/cc/1999/July/Pages/76_4_566.aspx), [Edwards et al. 1996](https://www.cerealsgrains.org/publications/cc/backissues/1996/Documents/CC1996a144.html)); Edwards found those levels below the farinograph optimum. A [KU Leuven thesis](https://lirias.kuleuven.be/retrieve/286277) summarises kansui as raising water absorption. These are sheeted noodles, so nothing published fits a hand press. The app therefore shows the range as context and calibrates the actual pressing hydration from your rated batches (median of 4+ rated batches, same mode, machine, liquid type and similar blend), which sets the added water in alkaline mode.
 
+## Addendum: rolled egg pasta
+
+Evidence behind the rolled mode (all hydration figures are water ÷ flour, as-is):
+- **Classic hand ratio**: 1 large egg per 100 g flour = 37.5 g of water per 100 g = **37.5 %**.
+- **Machine-kneaded sheet doughs** in the Sirman recipe book work out lower: egg pasta 30 %, ravioli doughs 28–33 %, water-based 30–33 %. A machine compacts the dough; a pin can't, so hand dough runs wetter.
+- **Hand semolina recipes** online span ~40–50 % water. Semolina absorbs slowly and feels dry for the first minutes, so judge after a rest of about 5 minutes (cook-blog consensus, low authority).
+- **Rest**: plain egg dough 30–45 min; semolina doughs 50–75 min; Sirman says hours of rest, chilled, make sheets stretchier.
+- **Thickness**: Bolognese tagliatelle a little under 1 mm, cut 6–7 mm; stuffed pasta 1 mm or thinner because dough doubles over the filling; lasagne sources conflict (~0.5 to ~1 mm).
+- All of these are placeholders flagged in the app, to be replaced by your calibrated batches. A strong 00 (Shipton W 340) may spring back under the pin; the app only says to rest and does not invent a number.
+
 ## Kept as-is, with reasons
 - **0.75 egg water and 0.90 in-shell yield.** Within published ranges (USDA ~76 %; shell ~9–12 %, falling with egg size [16]). Precision beyond this is swamped by flour moisture.
 - **The 28.6–31.5 % band.** Consistent with the industrial and recipe evidence above. Users personalise it through calibration rather than through new constants.

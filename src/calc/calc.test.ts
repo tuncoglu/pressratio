@@ -8,6 +8,7 @@ import {
   isStrongBlend,
   pressLoads,
   scaleForLoads,
+  sheetFor,
   blendSum,
   calculate,
   calibrationFor,
@@ -87,8 +88,65 @@ describe('extruded semolina + egg', () => {
     expect(r.status).toBe('invalid-blend');
   });
 
-  it('rolled mode is unsupported', () => {
-    expect(calculate({ ...base, mode: 'rolled' }).status).toBe('unsupported');
+});
+
+describe('rolled egg pasta', () => {
+  const rolled: CalcInput = { ...base, mode: 'rolled', machine: 'pin' };
+
+  it('classic ratio: 1 large egg (50 g) per 100 g flour = 37.5 %', () => {
+    const r = calculate({ ...rolled, egg: { kind: 'count', value: 4 } }); // 200 g egg
+    expect(r.flourTotalG).toBeCloseTo(400, 6);
+    expect(r.hydration).toBeCloseTo(0.375, 9);
+    expect(r.hydrationRange[0]).toBeCloseTo(0.35, 9);
+    expect(r.hydrationRange[1]).toBeCloseTo(0.42, 9);
+    // the same 210 g of egg wets 420 g of rolled dough but 525 g of pressed dough (wetter target = less flour)
+    expect(calculate(rolled).flourTotalG).toBeCloseTo(420, 6);
+    expect(calculate(base).flourTotalG).toBeCloseTo(525, 6);
+  });
+  it('is flagged uncalibrated for hydration and rest, until calibrated', () => {
+    expect(calculate(rolled).uncalibrated).toEqual(expect.arrayContaining(['ROLLED_HYDRATION', 'ROLLED_REST']));
+    const cal = calculate({ ...rolled, calibration: { target: 0.4, n: 3 } });
+    expect(cal.uncalibrated).not.toContain('ROLLED_HYDRATION');
+    expect(cal.uncalibrated).toContain('ROLLED_REST');
+    expect(cal.flourTotalG).toBeCloseTo(157.5 / 0.4, 6);
+  });
+  it('has a smooth-ball texture target and no roller warning', () => {
+    const r = calculate({ ...rolled, machine: 'roller' });
+    expect(r.textureTarget).toContain('smooth, firm ball');
+    expect(r.warnings.map((w) => w.id)).not.toContain('roller-extruded');
+  });
+  it('rest: 30 min plain, 60 min all-coarse semolina; temperature shifts as before', () => {
+    const plain = { type00: 100, fineSemolina: 0, coarseSemolina: 0, breadFlour: 0 };
+    expect(restPlan(plain, 20, 'rolled')).toMatchObject({ minMin: 30, maxMin: 45 });
+    expect(restPlan(COARSE, 20, 'rolled')).toMatchObject({ minMin: 60, maxMin: 75 });
+    expect(restPlan(COARSE, 15, 'rolled').minMin).toBe(70);
+    expect(restPlan(COARSE, 30, 'rolled').minMin).toBe(55);
+    expect(restPlan(COARSE, 20, 'rolled').notes.join(' ')).toContain('Wrapping stops a dry skin');
+  });
+  it('warns that an all-coarse dough rolls gritty; not for blends', () => {
+    expect(calculate(rolled).warnings.map((w) => w.id)).toContain('rolled-all-coarse');
+    expect(calculate({ ...rolled, blend: BLEND_PRESETS[2].blend }).warnings.map((w) => w.id)).not.toContain(
+      'rolled-all-coarse',
+    );
+  });
+  it('knead test: wait 5 min before adding water; sticky -> knead in flour', () => {
+    const dry = squeezeAdvice('powdery', 420, 'rolled');
+    expect(dry.action).toContain('Rest it 5 minutes first');
+    expect(dry.waterStepG).toBe(4);
+    expect(squeezeAdvice('crumbly', 420, 'rolled').action).toBe('Ready. Wrap it and rest, then roll.');
+    const wet = squeezeAdvice('sticky', 420, 'rolled');
+    expect(wet.verdict).toBe('add-semolina');
+    expect(wet.semolinaStepG).toBe(8);
+    // the pressed-dough wording is unchanged
+    expect(squeezeAdvice('crumbly', 420).action).toBe('Ready. Load the press.');
+  });
+  it('sheet area from dough weight and thickness', () => {
+    // 630 g dough at 1 mm, 1.1 g/cm³ -> 5727 cm²
+    const s = sheetFor(630, 1);
+    expect(s.areaCm2).toBeCloseTo(5727.27, 1);
+    expect(s.sheets).toBeCloseTo(3.58, 2); // 40 x 40 cm sheets
+    expect(sheetFor(630, 0.5).areaCm2).toBeCloseTo(2 * s.areaCm2, 6); // half as thick = double the area
+    expect(sheetFor(0, 1).areaCm2).toBe(0);
   });
 });
 

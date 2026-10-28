@@ -1,5 +1,5 @@
 import { formatAmount, formatTsp, squeezeAdvice } from '../calc/calc';
-import type { Batch, SqueezeState, Unit } from '../calc/types';
+import type { Batch, Mode, SqueezeState, Unit } from '../calc/types';
 
 const STATES: { id: SqueezeState; label: string; sub: string }[] = [
   { id: 'crumbly', label: 'Slightly crumbly', sub: 'clumps in hand' },
@@ -7,7 +7,14 @@ const STATES: { id: SqueezeState; label: string; sub: string }[] = [
   { id: 'sticky', label: 'Smooth sticky ball', sub: 'forms a smooth ball' },
 ];
 
+const KNEAD_STATES: { id: SqueezeState; label: string; sub: string }[] = [
+  { id: 'crumbly', label: 'Smooth and firm', sub: 'barely tacky, springs back slowly' },
+  { id: 'powdery', label: 'Dry and shaggy', sub: "won't come together" },
+  { id: 'sticky', label: 'Sticky', sub: 'clings to hands and board' },
+];
+
 interface Props {
+  mode: Mode;
   state: SqueezeState | null;
   onState: (s: SqueezeState | null) => void;
   unit: Unit;
@@ -17,13 +24,18 @@ interface Props {
   onLogAdjust: (p: { waterG?: number; semolinaG?: number }) => void;
 }
 
-export function SqueezeTest({ state, onState, unit, flourG, activeBatch, onLogAdjust }: Props) {
-  const advice = state ? squeezeAdvice(state, flourG) : null;
+export function SqueezeTest({ mode, state, onState, unit, flourG, activeBatch, onLogAdjust }: Props) {
+  const rolled = mode === 'rolled';
+  const advice = state ? squeezeAdvice(state, flourG, mode) : null;
   return (
     <div>
-      <p>Squeeze a handful of the rested mix, then tap what you feel:</p>
-      <div className="squeeze-grid" role="radiogroup" aria-label="Squeeze test result">
-        {STATES.map((s) => (
+      <p>
+        {rolled
+          ? 'Knead for several minutes, rest 5 minutes, then press a finger into the dough and tap what you feel:'
+          : 'Squeeze a handful of the rested mix, then tap what you feel:'}
+      </p>
+      <div className="squeeze-grid" role="radiogroup" aria-label={rolled ? 'Knead test result' : 'Squeeze test result'}>
+        {(rolled ? KNEAD_STATES : STATES).map((s) => (
           <button
             key={s.id}
             type="button"
@@ -43,7 +55,8 @@ export function SqueezeTest({ state, onState, unit, flourG, activeBatch, onLogAd
           <strong>{advice.action}</strong>
           {advice.verdict === 'add-water' && (
             <p className="hint">
-              Each step is ~1 % of your flour and raises hydration about 1 point, a third of the acceptable band. A
+              Each step is ~1 % of your flour and raises hydration about 1 point
+              {rolled ? ', so go slowly: the band is only about 7 points wide' : ', a third of the acceptable band'}. A
               spray bottle spreads small amounts more evenly than pouring.
             </p>
           )}

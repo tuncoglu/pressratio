@@ -1,6 +1,7 @@
 import { DEFAULT_EGG_SIZE, EGG_SIZES, type EggSize } from './calc/constants';
 import { BIGOLARO_MODELS, ELECTRIC_MODELS, type BigolaroModel, type ElectricModel } from './data/bottene';
 import { DEFAULT_FLOUR_CHOICE, flourById, type FlourChoice } from './data/flours';
+import { ROLL_SHAPES, type RollShape } from './data/rolled';
 import type { Batch, Blend, EggKind, FlourKey, Machine, Mode, Unit } from './calc/types';
 import { FLOUR_KEYS, blendSum } from './calc/calc';
 
@@ -27,6 +28,8 @@ export interface FormState {
   ambientC: number | null;
   /** Use the personal target from the batch log when one exists. */
   useCalibration: boolean;
+  /** Shape being rolled (rolled mode). */
+  rollShape: RollShape;
 }
 
 export interface AppState {
@@ -55,6 +58,7 @@ export const DEFAULT_FORM: FormState = {
   flours: DEFAULT_FLOUR_CHOICE,
   ambientC: null,
   useCalibration: true,
+  rollShape: 'ribbons',
 };
 
 export const DEFAULT_STATE: AppState = {
@@ -108,7 +112,7 @@ export function exportJson(state: Pick<AppState, 'unit' | 'batches'>): string {
 }
 
 const MODES: Mode[] = ['extruded', 'alkaline', 'rolled'];
-const MACHINES: Machine[] = ['manual', 'electric', 'roller'];
+const MACHINES: Machine[] = ['manual', 'electric', 'roller', 'pin'];
 
 const num = (v: unknown, fallback = 0): number =>
   typeof v === 'number' && Number.isFinite(v) ? v : fallback;
@@ -164,7 +168,8 @@ function sanitizeForm(v: unknown): FormState {
   const f = { ...DEFAULT_FORM, ...(v && typeof v === 'object' ? v : {}) } as FormState;
   if (!(f.eggSize in EGG_SIZES)) f.eggSize = DEFAULT_EGG_SIZE;
   if (blendSum(f.blend ?? ({} as Blend)) !== 100) f.blend = DEFAULT_FORM.blend;
-  if (f.mode === 'rolled') f.mode = 'extruded';
+  if (!(f.rollShape in ROLL_SHAPES)) f.rollShape = 'ribbons';
+  if (!['manual', 'electric', 'roller', 'pin'].includes(f.machine)) f.machine = 'manual';
   if (f.pressModel != null && !(f.pressModel in BIGOLARO_MODELS)) f.pressModel = null;
   if (f.electricModel != null && !(f.electricModel in ELECTRIC_MODELS)) f.electricModel = null;
   if (typeof f.dieId !== 'string') f.dieId = '';

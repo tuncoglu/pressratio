@@ -142,7 +142,38 @@ export const WATER_ONLY_HYDRATION = { target: 0.3, min: 0.286, max: 0.315 } as c
  */
 export const LYE_WATER_CARBONATE_FRACTION = 0.25;
 
-export type PlaceholderId = 'WATER_ONLY_HYDRATION' | 'LYE_WATER_CARBONATE_FRACTION';
+// PLACEHOLDER — needs user calibration
+/**
+ * Hand-rolled egg pasta, water as a fraction of flour weight. Target 37.5 % is
+ * the classic ratio: 1 large egg (50 g shelled x 0.75 = 37.5 g water) per
+ * 100 g flour. The band is a guess: sources span ~28–33 % (Sirman's
+ * machine-kneaded sheet doughs, which the machine compacts) to ~40–50 % (hand
+ * recipes, esp. semolina). Hand-rolling can't compact dough, so it runs wetter.
+ */
+export const ROLLED_HYDRATION = { target: 0.375, min: 0.35, max: 0.42 } as const;
+
+// PLACEHOLDER — needs user calibration
+/**
+ * Rest for rolled dough, minutes: ~30 for plain egg dough (30–45 min), rising
+ * to ~60 for all-semolina dough (50–75 min), because coarse particles hydrate
+ * slowly. Cook-blog figures, not measured; Sirman says a longer rest (hours)
+ * makes sheets stretchier.
+ */
+export const ROLLED_REST = { baseMin: 30, coarseExtraMin: 30, spanMin: 15 } as const;
+
+// PLACEHOLDER — needs user calibration
+/** Fresh egg dough density (g/cm³), used only to turn dough weight into sheet area. */
+export const DOUGH_DENSITY = 1.1;
+
+/** Display convenience: roughly how big a sheet fits a board and a long pin. */
+export const SHEET_REF_CM = 40;
+
+export type PlaceholderId =
+  | 'WATER_ONLY_HYDRATION'
+  | 'LYE_WATER_CARBONATE_FRACTION'
+  | 'ROLLED_HYDRATION'
+  | 'ROLLED_REST'
+  | 'DOUGH_DENSITY';
 
 /** Human-readable list, shown in the UI and mirrored in the README. */
 export const PLACEHOLDERS: Record<PlaceholderId, { label: string; value: string }> = {
@@ -153,5 +184,17 @@ export const PLACEHOLDERS: Record<PlaceholderId, { label: string; value: string 
   LYE_WATER_CARBONATE_FRACTION: {
     label: 'Alkali content of bottled lye water',
     value: '~25 % by weight (brands vary and rarely publish it)',
+  },
+  ROLLED_HYDRATION: {
+    label: 'Hydration of hand-rolled egg pasta',
+    value: '37.5 % of flour (1 large egg per 100 g), band 35–42 %; published figures span 28–50 %',
+  },
+  ROLLED_REST: {
+    label: 'Rest time for rolled dough',
+    value: '30 min, up to 60 min for all-coarse-semolina dough (cook-blog consensus)',
+  },
+  DOUGH_DENSITY: {
+    label: 'Egg dough density (for sheet size)',
+    value: '1.1 g/cm³',
   },
 };
