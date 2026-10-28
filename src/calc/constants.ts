@@ -165,6 +165,24 @@ export const ROLLED_REST = { baseMin: 30, coarseExtraMin: 30, spanMin: 15 } as c
 /** Fresh egg dough density (g/cm³), used only to turn dough weight into sheet area. */
 export const DOUGH_DENSITY = 1.1;
 
+// PLACEHOLDER — needs user calibration
+/**
+ * Ravioli filling per cm² of one ravioli face, grams. No authoritative figure
+ * exists. Two weak anchors agree: ~1 tsp (about 5 g) for a 4–5 cm square, and
+ * one recipe's 35 pieces of ~4 cm weighing ~250 g (~7 g each, dough included).
+ * 0.2 g/cm² gives 3.2 g at 4 cm, 5 g at 5 cm and 7.2 g at 6 cm, and a filling
+ * to dough ratio near 1:1 by weight at 0.8 mm. Override per ravioli in the app.
+ */
+export const FILLING_G_PER_CM2 = 0.2;
+
+/**
+ * Fresh filled pasta per person, grams: ~120–150 g as a main (midpoint 135),
+ * ~90 g as a first course (Italian portion guidance cited by cooking sites;
+ * low authority). Used only to turn a batch into servings.
+ */
+export const RAVIOLI_PORTION_G = { starter: 90, main: 135 } as const;
+export type RavioliPortion = keyof typeof RAVIOLI_PORTION_G;
+
 /** Display convenience: roughly how big a sheet fits a board and a long pin. */
 export const SHEET_REF_CM = 40;
 
@@ -173,7 +191,8 @@ export type PlaceholderId =
   | 'LYE_WATER_CARBONATE_FRACTION'
   | 'ROLLED_HYDRATION'
   | 'ROLLED_REST'
-  | 'DOUGH_DENSITY';
+  | 'DOUGH_DENSITY'
+  | 'FILLING_G_PER_CM2';
 
 /** Human-readable list, shown in the UI and mirrored in the README. */
 export const PLACEHOLDERS: Record<PlaceholderId, { label: string; value: string }> = {
@@ -196,5 +215,9 @@ export const PLACEHOLDERS: Record<PlaceholderId, { label: string; value: string 
   DOUGH_DENSITY: {
     label: 'Egg dough density (for sheet size)',
     value: '1.1 g/cm³',
+  },
+  FILLING_G_PER_CM2: {
+    label: 'Ravioli filling per cm² of one face',
+    value: '0.2 g/cm² (≈ 5 g for a 5 cm square); override per ravioli',
   },
 };

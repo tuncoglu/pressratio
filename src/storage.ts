@@ -1,4 +1,4 @@
-import { DEFAULT_EGG_SIZE, EGG_SIZES, type EggSize } from './calc/constants';
+import { DEFAULT_EGG_SIZE, EGG_SIZES, RAVIOLI_PORTION_G, type EggSize, type RavioliPortion } from './calc/constants';
 import { BIGOLARO_MODELS, ELECTRIC_MODELS, type BigolaroModel, type ElectricModel } from './data/bottene';
 import { DEFAULT_FLOUR_CHOICE, flourById, type FlourChoice } from './data/flours';
 import { ROLL_SHAPES, type RollShape } from './data/rolled';
@@ -30,6 +30,11 @@ export interface FormState {
   useCalibration: boolean;
   /** Shape being rolled (rolled mode). */
   rollShape: RollShape;
+  /** Ravioli side length, cm. */
+  ravioliCm: number;
+  /** Your own filling per ravioli (g); null = estimate from size. */
+  fillingG: number | null;
+  ravioliPortion: RavioliPortion;
 }
 
 export interface AppState {
@@ -59,6 +64,9 @@ export const DEFAULT_FORM: FormState = {
   ambientC: null,
   useCalibration: true,
   rollShape: 'ribbons',
+  ravioliCm: 5,
+  fillingG: null,
+  ravioliPortion: 'main',
 };
 
 export const DEFAULT_STATE: AppState = {
@@ -169,6 +177,9 @@ function sanitizeForm(v: unknown): FormState {
   if (!(f.eggSize in EGG_SIZES)) f.eggSize = DEFAULT_EGG_SIZE;
   if (blendSum(f.blend ?? ({} as Blend)) !== 100) f.blend = DEFAULT_FORM.blend;
   if (!(f.rollShape in ROLL_SHAPES)) f.rollShape = 'ribbons';
+  if (!(typeof f.ravioliCm === 'number' && f.ravioliCm > 0 && f.ravioliCm < 30)) f.ravioliCm = DEFAULT_FORM.ravioliCm;
+  if (typeof f.fillingG !== 'number' || !(f.fillingG > 0)) f.fillingG = null;
+  if (!(f.ravioliPortion in RAVIOLI_PORTION_G)) f.ravioliPortion = 'main';
   if (!['manual', 'electric', 'roller', 'pin'].includes(f.machine)) f.machine = 'manual';
   if (f.pressModel != null && !(f.pressModel in BIGOLARO_MODELS)) f.pressModel = null;
   if (f.electricModel != null && !(f.electricModel in ELECTRIC_MODELS)) f.electricModel = null;

@@ -83,6 +83,7 @@ Evidence behind the rolled mode (all hydration figures are water ÷ flour, as-is
 - **Hand semolina recipes** online span ~40–50 % water. Semolina absorbs slowly and feels dry for the first minutes, so judge after a rest of about 5 minutes (cook-blog consensus, low authority).
 - **Rest**: plain egg dough 30–45 min; semolina doughs 50–75 min; Sirman says hours of rest, chilled, make sheets stretchier.
 - **Thickness**: Bolognese tagliatelle a little under 1 mm, cut 6–7 mm; stuffed pasta 1 mm or thinner because dough doubles over the filling; lasagne sources conflict (~0.5 to ~1 mm).
+- **Ravioli filling**: no authoritative figure found. A rule of thumb is ~1 tsp (≈ 5 g) per 4–5 cm square; one recipe lists 35 pieces of ~4 cm weighing ~250 g (≈ 7 g each, dough included). Both fit ~0.2 g of filling per cm² of face. Serving sizes (120–150 g main, ~90 g first course) come from Italian portion guidance cited by cooking sites, low authority.
 - All of these are placeholders flagged in the app, to be replaced by your calibrated batches. A strong 00 (Shipton W 340) may spring back under the pin; the app only says to rest and does not invent a number.
 
 ## Kept as-is, with reasons

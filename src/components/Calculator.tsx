@@ -35,6 +35,7 @@ import type { FormState } from '../storage';
 import { BlendEditor } from './BlendEditor';
 import { Uncalibrated, UncalibratedList, Unvalidated } from './Bits';
 import { NumField } from './NumField';
+import { RavioliGuide } from './RavioliGuide';
 import { SqueezeTest } from './SqueezeTest';
 
 interface Props {
@@ -412,6 +413,10 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
             onChange={(v) => patch({ ambientC: v })}
           />
         </fieldset>
+      )}
+
+      {rolled && form.rollShape === 'ravioli' && r.status === 'ok' && (
+        <RavioliGuide form={form} patch={patch} doughG={dough} thicknessMm={shape.thicknessMm} unit={unit} />
       )}
 
       {/* ---- Machine ---- */}

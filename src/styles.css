@@ -128,6 +128,7 @@ textarea { min-height: 72px; resize: vertical; }
 .radio input { width: 24px; height: 24px; accent-color: var(--brand); flex: none; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.chip.chip-on { background: var(--brand); color: var(--brand-ink); }
 .chip {
   min-height: 44px; padding: 0 14px; border-radius: 22px; border: 2px solid var(--brand);
   background: transparent; color: var(--ink); font: inherit; font-size: 0.95rem; cursor: pointer;

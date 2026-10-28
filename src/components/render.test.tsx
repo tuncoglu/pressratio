@@ -109,6 +109,28 @@ describe('render smoke tests', () => {
     expect(out).toContain('An all-coarse-semolina dough is slow to hydrate');
   });
 
+  it('ravioli shape shows the filling guide; other shapes do not', () => {
+    const f = { ...DEFAULT_FORM, mode: 'rolled' as const, machine: 'pin' as const };
+    const out = render({ ...f, rollShape: 'ravioli' });
+    expect(out).toContain('<legend>Ravioli filling</legend>');
+    expect(out).toContain('≈ 143 ravioli (5 cm) need 715 g of filling');
+    expect(out).toContain('5 g (≈ 1 tsp)');
+    expect(out).toContain('4.4 g (two layers at 0.8 mm)');
+    expect(out).toContain('1.1 : 1');
+    expect(out).toContain('Main course (135 g per person)');
+    expect(out).toContain('uncalibrated');
+    expect(render({ ...f, rollShape: 'ribbons' })).not.toContain('Ravioli filling');
+    expect(render({ ...f, rollShape: 'lasagne' })).not.toContain('Ravioli filling');
+    expect(render({ ...DEFAULT_FORM, rollShape: 'ravioli' })).not.toContain('Ravioli filling'); // not rolled mode
+  });
+
+  it('ravioli guide uses your own filling weight and drops the badge on that row', () => {
+    const f = { ...DEFAULT_FORM, mode: 'rolled' as const, machine: 'pin' as const, rollShape: 'ravioli' as const };
+    const out = render({ ...f, fillingG: 6, ravioliCm: 4 });
+    expect(out).toContain('6 g (≈ 1¼ tsp)');
+    expect(out).toContain('(4 cm)');
+  });
+
   it('rolled mode: lasagne and ravioli thicknesses follow the shape', () => {
     const f = { ...DEFAULT_FORM, mode: 'rolled' as const, machine: 'pin' as const };
     expect(render({ ...f, rollShape: 'ravioli' })).toContain('Roll to about 0.8 mm');

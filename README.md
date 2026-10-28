@@ -60,6 +60,8 @@ Extruded semolina + egg:
 
 **Rolled egg pasta** (ribbons, ravioli, lasagne; by pin or pasta roller): the same water-fraction model with a wetter target, **37.5 %**, which is the classic 1 large egg (50 g shelled) per 100 g flour. Hand-rolling can't compact dough the way a machine does, so it runs wetter than Sirman's machine-kneaded sheet doughs (28–33 %), and hand recipes in the wild span 37–50 %. The band (35–42 %) is a guess until you calibrate. Rest is 30 min for plain egg dough, rising to 60 min for all-coarse-semolina dough because coarse particles hydrate slowly; a knead test replaces the squeeze test ("rest 5 minutes before adding water", because semolina feels dry at first). The result also shows how big the sheet gets: dough weight ÷ (density × thickness), with thickness per shape (ribbons ~1 mm, ravioli ~0.8 mm, lasagne 1.5 mm) and cut widths from Bottene's die catalogue.
 
+**Ravioli filling guide** (rolled mode, ravioli shape): each ravioli is two layers of sheet, so it uses 2 × side² × thickness × density of dough. Filling scales with face area at 0.2 g/cm² (≈ 1 tsp, 5 g, for a 5 cm square), or your own weighed figure if you enter one. The guide shows how many ravioli your dough makes, the filling total, filling : dough (about 1 : 1 at 0.8 mm), and servings at 90 g (first course) or 135 g (main) per person. Cut waste isn't counted.
+
 **Asian alkaline noodles** are a reference recipe scaled linearly from the egg weight, shown with baker's percentages: egg 35 %, baked baking soda (sodium carbonate) 1.5 %, salt 0.7 %, added water 10–17 % (starts at 10 %) — all of flour weight. The pre-bake baking-soda weight is shown (÷ 0.631). Entering lye water replaces the baked soda; the app estimates its alkali content from a placeholder and flags it **unvalidated**. With a press, the app also notes that this recipe (36–43 %) is wetter than the extrusion band.
 
 **Rest time:** base = 20 + 10 × coarse-semolina share, rounded to 5 min; +10 below 18 °C; −5 above 26 °C; range = base … base + 10. Hold limit for raw-egg dough: 2 h, or 1 h above 32 °C (USDA).
@@ -81,6 +83,7 @@ Shown in the UI with an "uncalibrated" badge wherever they affect a result.
 | `ROLLED_HYDRATION` | 37.5 % (35–42 %) | Published figures span 28–50 %; replaced by your calibrated target |
 | `ROLLED_REST` | 30 min, up to 60 for all-coarse semolina | Cook-blog consensus, not measured |
 | `DOUGH_DENSITY` | 1.1 g/cm³ | Only converts dough weight to sheet area |
+| `FILLING_G_PER_CM2` | 0.2 g/cm² | Two weak anchors (≈ 1 tsp per 4–5 cm; one recipe's 35 × 4 cm pieces ≈ 250 g); override per ravioli |
 | Roll thicknesses (`src/data/rolled.ts`) | ribbons 1, ravioli 0.8, lasagne 1.5 mm | Sources disagree, especially for lasagne (0.5–1 mm) |
 
 ## Assumptions

@@ -23,6 +23,9 @@ import {
   SCALE_RESOLUTION_G,
   SHEET_REF_CM,
   DOUGH_DENSITY,
+  FILLING_G_PER_CM2,
+  RAVIOLI_PORTION_G,
+  type RavioliPortion,
   STRONG_BLEND_PROTEIN,
   SEMOLINA_STEP_FRACTION,
   TSP_WATER_G,
@@ -523,6 +526,52 @@ export function sheetFor(doughG: number, thicknessMm: number): { areaCm2: number
   if (doughG <= 0 || thicknessMm <= 0) return { areaCm2: 0, sheets: 0, sideCm: 0 };
   const areaCm2 = doughG / (DOUGH_DENSITY * (thicknessMm / 10));
   return { areaCm2, sheets: areaCm2 / SHEET_REF_CM ** 2, sideCm: Math.sqrt(areaCm2) };
+}
+
+// ---- Ravioli filling ----------------------------------------------------
+
+export interface RavioliPlan {
+  /** Whole ravioli the dough makes (cut waste not counted). */
+  count: number;
+  doughPerG: number;
+  fillingPerG: number;
+  fillingTotalG: number;
+  /** Finished weight of one ravioli, grams. */
+  pieceG: number;
+  /** Filling weight ÷ dough weight, per ravioli. */
+  fillingToDough: number;
+  servings: number;
+  piecesPerServing: number;
+}
+
+/**
+ * Each ravioli is two layers of sheet (an s × s cm square of each, seam
+ * included), so it uses 2 s² t ρ of dough. Filling scales with face area unless
+ * the user supplies their own per-ravioli weight.
+ */
+export function ravioliPlan(
+  doughG: number,
+  thicknessMm: number,
+  sizeCm: number,
+  portion: RavioliPortion,
+  fillingOverrideG: number | null = null,
+): RavioliPlan | null {
+  if (doughG <= 0 || thicknessMm <= 0 || sizeCm <= 0) return null;
+  const doughPerG = 2 * sizeCm ** 2 * (thicknessMm / 10) * DOUGH_DENSITY;
+  const count = Math.floor(doughG / doughPerG);
+  const fillingPerG = fillingOverrideG && fillingOverrideG > 0 ? fillingOverrideG : FILLING_G_PER_CM2 * sizeCm ** 2;
+  const pieceG = doughPerG + fillingPerG;
+  const servings = (count * pieceG) / RAVIOLI_PORTION_G[portion];
+  return {
+    count,
+    doughPerG,
+    fillingPerG,
+    fillingTotalG: count * fillingPerG,
+    pieceG,
+    fillingToDough: fillingPerG / doughPerG,
+    servings,
+    piecesPerServing: servings > 0 ? count / servings : 0,
+  };
 }
 
 // ---- Dough, press loads, flours ----------------------------------------

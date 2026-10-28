@@ -105,7 +105,7 @@ For the current mode + machine + liquid type (egg vs water-only) + similar blend
 Every numeric constant lives in `constants.ts`, each with a source comment: given by this brief, derived (with source), or `// PLACEHOLDER — needs user calibration`. Placeholders get an "uncalibrated" badge in the UI. Current placeholders: water-only extrusion hydration (30 %), lye-water alkali fraction (0.25).
 
 ### 5.6 [v2] Rolled egg pasta
-Same water-fraction model, target **37.5 %** (1 large egg per 100 g flour), band 35–42 %, all marked PLACEHOLDER (published figures span 28–50 %; machine-kneaded dough runs lower than hand-rolled). Rest 30 min, rising to 60 min for all-coarse-semolina dough. A knead test replaces the squeeze test (rest 5 min before adding water; add flour if sticky). Show sheet area from dough weight, density and thickness per shape. Calibrates from rated rolled batches like the other modes.
+Same water-fraction model, target **37.5 %** (1 large egg per 100 g flour), band 35–42 %, all marked PLACEHOLDER (published figures span 28–50 %; machine-kneaded dough runs lower than hand-rolled). Rest 30 min, rising to 60 min for all-coarse-semolina dough. A knead test replaces the squeeze test (rest 5 min before adding water; add flour if sticky). Show sheet area from dough weight, density and thickness per shape. Calibrates from rated rolled batches like the other modes. For ravioli, add a filling guide: dough per ravioli = 2 s² t ρ, filling = 0.2 g/cm² of face (PLACEHOLDER) or the user's own weighed amount, plus ravioli count, filling total, filling : dough and servings (90 g first course, 135 g main).
 
 ## 6. Rest-time logic
 ```

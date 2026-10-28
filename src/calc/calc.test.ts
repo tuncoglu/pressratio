@@ -9,6 +9,7 @@ import {
   pressLoads,
   scaleForLoads,
   sheetFor,
+  ravioliPlan,
   blendSum,
   calculate,
   calibrationFor,
@@ -427,6 +428,41 @@ describe('dough, press loads and flours', () => {
     expect(isStrongBlend(s.protein)).toBe(false);
     expect(isStrongBlend(13.5)).toBe(true);
     expect(blendStats(COARSE, {}).protein).toBeNull();
+  });
+});
+
+describe('ravioli filling guide', () => {
+  it('two layers of sheet per ravioli: 5 cm at 0.8 mm = 4.4 g of dough', () => {
+    const p = ravioliPlan(630, 0.8, 5, 'main')!;
+    expect(p.doughPerG).toBeCloseTo(4.4, 9); // 2 x 25 cm² x 0.08 cm x 1.1
+    expect(p.count).toBe(143);
+  });
+  it('filling scales with face area: ~1 tsp (5 g) at 5 cm, 3.2 g at 4 cm, 7.2 g at 6 cm', () => {
+    expect(ravioliPlan(630, 0.8, 5, 'main')!.fillingPerG).toBeCloseTo(5, 9);
+    expect(ravioliPlan(630, 0.8, 4, 'main')!.fillingPerG).toBeCloseTo(3.2, 9);
+    expect(ravioliPlan(630, 0.8, 6, 'main')!.fillingPerG).toBeCloseTo(7.2, 9);
+  });
+  it('filling : dough is close to 1 : 1 at 5 cm and 0.8 mm', () => {
+    expect(ravioliPlan(630, 0.8, 5, 'main')!.fillingToDough).toBeCloseTo(1.14, 2);
+  });
+  it('totals and servings (135 g main, 90 g starter)', () => {
+    const p = ravioliPlan(630, 0.8, 5, 'main')!;
+    expect(p.fillingTotalG).toBeCloseTo(143 * 5, 6);
+    expect(p.pieceG).toBeCloseTo(9.4, 9);
+    expect(p.servings).toBeCloseTo((143 * 9.4) / 135, 6);
+    expect(p.piecesPerServing).toBeCloseTo(143 / p.servings, 9);
+    expect(ravioliPlan(630, 0.8, 5, 'starter')!.servings).toBeCloseTo((143 * 9.4) / 90, 6);
+  });
+  it("the user's own filling weight overrides the estimate", () => {
+    const p = ravioliPlan(630, 0.8, 5, 'main', 6)!;
+    expect(p.fillingPerG).toBe(6);
+    expect(p.fillingTotalG).toBeCloseTo(143 * 6, 6);
+    expect(ravioliPlan(630, 0.8, 5, 'main', 0)!.fillingPerG).toBeCloseTo(5, 9);
+  });
+  it('thicker sheets mean fewer ravioli; bad inputs give null', () => {
+    expect(ravioliPlan(630, 1.5, 5, 'main')!.count).toBeLessThan(ravioliPlan(630, 0.8, 5, 'main')!.count);
+    expect(ravioliPlan(0, 0.8, 5, 'main')).toBeNull();
+    expect(ravioliPlan(630, 0.8, 0, 'main')).toBeNull();
   });
 });
 
