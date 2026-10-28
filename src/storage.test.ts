@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { exportJson, mergeBatches, parseImport, sanitizeBatch } from './storage';
+import { DEFAULT_FORM, exportJson, mergeBatches, parseImport, sanitizeBatch, sanitizeForm } from './storage';
 import type { Batch } from './calc/types';
 
 const batch = (id: string, createdAt: string): Batch => ({
@@ -22,6 +22,33 @@ const batch = (id: string, createdAt: string): Batch => ({
   extraSemolinaG: 0,
   rating: 3,
   notes: 'ok',
+});
+
+describe('detected ambient temperature goes stale', () => {
+  const now = 10 * 3_600_000;
+  it('keeps a recent detected reading and its timestamp', () => {
+    const f = sanitizeForm({ ...DEFAULT_FORM, ambientC: 13.6, ambientAutoAt: now - 30 * 60_000 }, now);
+    expect(f.ambientC).toBe(13.6);
+    expect(f.ambientAutoAt).toBe(now - 30 * 60_000);
+  });
+  it('drops a reading older than 3 hours so it cannot silently change the rest time', () => {
+    const f = sanitizeForm({ ...DEFAULT_FORM, ambientC: 13.6, ambientAutoAt: now - 4 * 3_600_000 }, now);
+    expect(f.ambientC).toBeNull();
+    expect(f.ambientAutoAt).toBeNull();
+  });
+  it('never touches a temperature typed by hand', () => {
+    const f = sanitizeForm({ ...DEFAULT_FORM, ambientC: 21, ambientAutoAt: null }, now);
+    expect(f.ambientC).toBe(21);
+  });
+  it('ignores a timestamp from the future and junk values', () => {
+    expect(sanitizeForm({ ...DEFAULT_FORM, ambientC: 9, ambientAutoAt: now + 3_600_000 }, now).ambientC).toBeNull();
+    expect(sanitizeForm({ ...DEFAULT_FORM, ambientC: 9, ambientAutoAt: 'x' }, now).ambientAutoAt).toBeNull();
+  });
+  it('auto-detect defaults to off', () => {
+    expect(sanitizeForm({}, now).autoDetect).toBe(false);
+    expect(sanitizeForm({ autoDetect: 'yes' }, now).autoDetect).toBe(false);
+    expect(sanitizeForm({ autoDetect: true }, now).autoDetect).toBe(true);
+  });
 });
 
 describe('export / import', () => {

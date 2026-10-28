@@ -2,7 +2,7 @@
 
 Live at https://pasta.sourdoughcalculator.uk. Dough calculator for home pasta and Asian noodle makers — manual presses (Bigolaro-style), electric extruders and rollers. **Guidance, not guarantee.**
 
-Offline-first, mobile-first PWA. No backend, no accounts, no analytics, no network calls at runtime. All state and batch logs live in `localStorage`; export/import as JSON.
+Offline-first, mobile-first PWA. No backend, no accounts, no analytics. The only network call is the optional ambient-temperature lookup (below), made only when you ask for it. All state and batch logs live in `localStorage`; export/import as JSON.
 
 ## Run
 
@@ -59,6 +59,8 @@ Extruded semolina + egg:
 **Flours:** each blend slot takes a specific flour. Shipton Mill's 00 (118, 120), semolina (507) and bread flours (105, 102, 112, 101) carry protein, W, P/L and ash from Shipton's specs (via the SourDough project). The blend shows share-weighted protein and W, and blends at ≥ 13.5 % protein get a "strong blend" note. These figures inform; they don't change the hydration maths, since calibration captures their effect.
 
 **Rolled egg pasta** (ribbons, ravioli, lasagne; by pin or pasta roller): the same water-fraction model with a wetter target, **37.5 %**, which is the classic 1 large egg (50 g shelled) per 100 g flour. Hand-rolling can't compact dough the way a machine does, so it runs wetter than Sirman's machine-kneaded sheet doughs (28–33 %), and hand recipes in the wild span 37–50 %. The band (35–42 %) is a guess until you calibrate. Rest is 30 min for plain egg dough, rising to 60 min for all-coarse-semolina dough because coarse particles hydrate slowly; a knead test replaces the squeeze test ("rest 5 minutes before adding water", because semolina feels dry at first). The result also shows how big the sheet gets: dough weight ÷ (density × thickness), with thickness per shape (ribbons ~1 mm, ravioli ~0.8 mm, lasagne 1.5 mm) and cut widths from Bottene's die catalogue.
+
+**Ambient temperature (optional):** "Use my location" asks the browser for your position, rounds it to about 1 km, and reads the current outdoor temperature from [Open-Meteo](https://open-meteo.com/) (free, no key), the same approach as the SourDough app. It never runs unless you tap the button or tick "Detect automatically when I open the app". If you decline or are offline, you just type the temperature. A detected reading older than 3 hours is discarded when the app reopens. It is the *outdoor* temperature: your kitchen may differ, so type your room temperature if you know it. The temperature only shifts the rest time (±5–10 min) and the hold limit.
 
 **Ravioli filling guide** (rolled mode, ravioli shape): each ravioli is two layers of sheet, so it uses 2 × side² × thickness × density of dough. Filling scales with face area at 0.2 g/cm² (≈ 1 tsp, 5 g, for a 5 cm square), or your own weighed figure if you enter one. The guide shows how many ravioli your dough makes, the filling total, filling : dough (about 1 : 1 at 0.8 mm), and servings at 90 g (first course) or 135 g (main) per person. Cut waste isn't counted.
 

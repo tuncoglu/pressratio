@@ -19,7 +19,7 @@ Key insight: **"1 egg per 100 g flour" is wrong for extrusion.** Extruder dough 
 **[v2] Hydration basis:** every hydration figure is *as-is*: water added (egg water included) ÷ flour as weighed. Flour's own 10–15 % moisture is not modelled, because it varies by about as much as the target band. That is why the squeeze test has the final say. Say this in the UI.
 
 ## 3. Tech constraints
-- Static single-page app. **No backend, no accounts, no analytics, no network calls at runtime.**
+- Static single-page app. **No backend, no accounts, no analytics.** **[v2]** The one permitted network call is an *opt-in* ambient-temperature lookup (browser geolocation rounded to ~1 km → Open-Meteo current temperature), run only on a button tap or an explicit "detect automatically" setting, with a plain-language privacy note beside it, manual entry always available, and any detected reading discarded after 3 hours. Label it as the *outdoor* temperature.
 - React + Vite + TypeScript. PWA manifest + service worker that precaches the built files so the app works offline after the first visit.
 - Persist state and batch logs in `localStorage`; export/import as JSON. Import must validate and tolerate older exports (missing fields → defaults).
 - Unit toggle: grams / ounces, default grams. Store and calculate in grams.

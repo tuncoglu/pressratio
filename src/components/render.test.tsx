@@ -153,6 +153,26 @@ describe('render smoke tests', () => {
     expect(render(f, 'g', [mk('x', '2026-10-13T10:00:00Z', 5, 5)])).not.toContain('calibrated target');
   });
 
+  it('ambient temperature: opt-in location button and privacy note; shows a detected reading', () => {
+    const out = render();
+    expect(out).toContain('Use my location');
+    expect(out).toContain('Detect automatically when I open the app');
+    expect(out).toContain('rounded to about 1 km');
+    expect(out).toContain('nothing is sent unless you tap the button or turn this on');
+    expect(out).not.toContain('Outdoor temperature near you');
+    const t = new Date(2026, 9, 28, 11, 5).getTime();
+    const det = render({ ...DEFAULT_FORM, ambientC: 13.6, ambientAutoAt: t });
+    expect(det).toContain('Refresh from my location');
+    expect(det).toContain('Outdoor temperature near you at');
+    expect(det).toContain('Your kitchen may be warmer or cooler');
+    expect(det).toContain('value="13.6"');
+  });
+
+  it('rolled mode also offers the location button', () => {
+    const f = { ...DEFAULT_FORM, mode: 'rolled' as const, machine: 'pin' as const };
+    expect(render(f)).toContain('Use my location');
+  });
+
   it('egg count shows the size it assumes', () => {
     const out = render({ ...DEFAULT_FORM, eggKind: 'count', eggValue: 4, eggSize: 'euL' });
     expect(out).toContain('244 g shelled');

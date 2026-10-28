@@ -2,6 +2,7 @@ import { DEFAULT_EGG_SIZE, EGG_SIZES, RAVIOLI_PORTION_G, type EggSize, type Ravi
 import { BIGOLARO_MODELS, ELECTRIC_MODELS, type BigolaroModel, type ElectricModel } from './data/bottene';
 import { DEFAULT_FLOUR_CHOICE, flourById, type FlourChoice } from './data/flours';
 import { ROLL_SHAPES, type RollShape } from './data/rolled';
+import { AUTO_TEMP_MAX_AGE_MS } from './lib/weather';
 import type { Batch, Blend, EggKind, FlourKey, Machine, Mode, Unit } from './calc/types';
 import { FLOUR_KEYS, blendSum } from './calc/calc';
 
@@ -30,6 +31,10 @@ export interface FormState {
   useCalibration: boolean;
   /** Shape being rolled (rolled mode). */
   rollShape: RollShape;
+  /** When ambientC was filled in by location detection (ms since epoch); null = typed by hand. */
+  ambientAutoAt: number | null;
+  /** Detect the temperature automatically when the app opens (asks for location permission). */
+  autoDetect: boolean;
   /** Ravioli side length, cm. */
   ravioliCm: number;
   /** Your own filling per ravioli (g); null = estimate from size. */
@@ -64,6 +69,8 @@ export const DEFAULT_FORM: FormState = {
   ambientC: null,
   useCalibration: true,
   rollShape: 'ribbons',
+  ambientAutoAt: null,
+  autoDetect: false,
   ravioliCm: 5,
   fillingG: null,
   ravioliPortion: 'main',
@@ -172,8 +179,15 @@ function sanitizeFlours(v: unknown): Partial<Record<FlourKey, string>> | undefin
   return out;
 }
 
-function sanitizeForm(v: unknown): FormState {
+export function sanitizeForm(v: unknown, now: number = Date.now()): FormState {
   const f = { ...DEFAULT_FORM, ...(v && typeof v === 'object' ? v : {}) } as FormState;
+  f.autoDetect = f.autoDetect === true;
+  // A detected temperature goes stale: don't let yesterday's weather quietly change today's rest time.
+  if (typeof f.ambientAutoAt !== 'number' || !Number.isFinite(f.ambientAutoAt)) f.ambientAutoAt = null;
+  if (f.ambientAutoAt != null && (now - f.ambientAutoAt > AUTO_TEMP_MAX_AGE_MS || f.ambientAutoAt > now + 60_000)) {
+    f.ambientC = null;
+    f.ambientAutoAt = null;
+  }
   if (!(f.eggSize in EGG_SIZES)) f.eggSize = DEFAULT_EGG_SIZE;
   if (blendSum(f.blend ?? ({} as Blend)) !== 100) f.blend = DEFAULT_FORM.blend;
   if (!(f.rollShape in ROLL_SHAPES)) f.rollShape = 'ribbons';

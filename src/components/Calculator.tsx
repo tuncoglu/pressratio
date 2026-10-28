@@ -34,6 +34,7 @@ import { SHEET_REF_CM } from '../calc/constants';
 import type { FormState } from '../storage';
 import { BlendEditor } from './BlendEditor';
 import { Uncalibrated, UncalibratedList, Unvalidated } from './Bits';
+import { AmbientField } from './AmbientField';
 import { NumField } from './NumField';
 import { RavioliGuide } from './RavioliGuide';
 import { SqueezeTest } from './SqueezeTest';
@@ -404,14 +405,7 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
             </p>
             {shape.cuts && <p className="hint">Cut widths: {shape.cuts.join(' · ')}.</p>}
           </div>
-          <NumField
-            label="Ambient temperature (°C) — optional"
-            value={form.ambientC}
-            nullable
-            suffix="°C"
-            placeholder="20"
-            onChange={(v) => patch({ ambientC: v })}
-          />
+          <AmbientField form={form} patch={patch} />
         </fieldset>
       )}
 
@@ -515,14 +509,7 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
             />
           )}
         </div>
-        <NumField
-          label="Ambient temperature (°C) — optional"
-          value={form.ambientC}
-          nullable
-          suffix="°C"
-          placeholder="20"
-          onChange={(v) => patch({ ambientC: v })}
-        />
+        <AmbientField form={form} patch={patch} />
       </fieldset>
       )}
 

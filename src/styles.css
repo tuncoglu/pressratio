@@ -224,3 +224,6 @@ details.adjust summary { font-weight: 700; font-size: 1.1rem; min-height: 44px; 
 }
 .tabs button.on { color: #fff; border-top-color: #e9a35f; background: rgba(255, 255, 255, 0.08); }
 @media (min-width: 680px) { .tabs { max-width: 640px; margin: 0 auto; } }
+
+.ambient .check { display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 500; }
+.ambient .check input { width: 24px; height: 24px; accent-color: var(--brand); flex: none; }
