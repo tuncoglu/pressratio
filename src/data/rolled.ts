@@ -3,7 +3,8 @@
 // guides (a little under 1 mm, cut 6–7 mm), an Italian guide (~0.5 mm sheets),
 // a stuffed-pasta rule of thumb (1 mm or thinner, since filled dough doubles
 // where it folds over). Cut widths for tagliolini, fettuccine and pappardelle
-// are Bottene's die widths. Thicknesses are PLACEHOLDERS — tune to your pin.
+// are Bottene's die widths. Thicknesses are PLACEHOLDERS — tune to your pin
+// (lasagne is set to 1.5 mm at the owner's request).
 
 export type RollShape = 'ribbons' | 'ravioli' | 'lasagne';
 
@@ -36,9 +37,9 @@ export const ROLL_SHAPES: Record<RollShape, ShapeSpec> = {
   lasagne: {
     label: 'Lasagne sheets',
     short: 'Lasagne',
-    thicknessMm: 1,
-    rangeMm: [0.5, 1.5],
-    note: 'Sources disagree (about 0.5 to 1 mm). Thinner layers cook faster; a bit thicker holds up better in a bake.',
+    thicknessMm: 1.5,
+    rangeMm: [1, 2],
+    note: 'Set to 1.5 mm for your pin. Published sources disagree (about 0.5 to 1 mm); thicker sheets hold up better in a bake but need longer to cook.',
   },
 };
 

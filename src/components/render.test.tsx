@@ -112,7 +112,11 @@ describe('render smoke tests', () => {
   it('rolled mode: lasagne and ravioli thicknesses follow the shape', () => {
     const f = { ...DEFAULT_FORM, mode: 'rolled' as const, machine: 'pin' as const };
     expect(render({ ...f, rollShape: 'ravioli' })).toContain('Roll to about 0.8 mm');
-    expect(render({ ...f, rollShape: 'lasagne' })).toContain('Sources disagree');
+    const lasagne = render({ ...f, rollShape: 'lasagne' });
+    expect(lasagne).toContain('Roll to about 1.5 mm (range 1–2 mm)');
+    expect(lasagne).toContain('sources disagree');
+    // 630 g dough at 1.5 mm -> 3818 cm² = 2.4 sheets of 40 x 40 cm
+    expect(lasagne).toContain('630 g dough → about 2.4 sheets of 40 × 40 cm');
   });
 
   it('rolled mode offers a calibrated target from rolled batches only', () => {

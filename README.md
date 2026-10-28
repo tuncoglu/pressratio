@@ -58,7 +58,7 @@ Extruded semolina + egg:
 
 **Flours:** each blend slot takes a specific flour. Shipton Mill's 00 (118, 120), semolina (507) and bread flours (105, 102, 112, 101) carry protein, W, P/L and ash from Shipton's specs (via the SourDough project). The blend shows share-weighted protein and W, and blends at ≥ 13.5 % protein get a "strong blend" note. These figures inform; they don't change the hydration maths, since calibration captures their effect.
 
-**Rolled egg pasta** (ribbons, ravioli, lasagne; by pin or pasta roller): the same water-fraction model with a wetter target, **37.5 %**, which is the classic 1 large egg (50 g shelled) per 100 g flour. Hand-rolling can't compact dough the way a machine does, so it runs wetter than Sirman's machine-kneaded sheet doughs (28–33 %), and hand recipes in the wild span 37–50 %. The band (35–42 %) is a guess until you calibrate. Rest is 30 min for plain egg dough, rising to 60 min for all-coarse-semolina dough because coarse particles hydrate slowly; a knead test replaces the squeeze test ("rest 5 minutes before adding water", because semolina feels dry at first). The result also shows how big the sheet gets: dough weight ÷ (density × thickness), with thickness per shape (ribbons ~1 mm, ravioli ~0.8 mm, lasagne ~1 mm) and cut widths from Bottene's die catalogue.
+**Rolled egg pasta** (ribbons, ravioli, lasagne; by pin or pasta roller): the same water-fraction model with a wetter target, **37.5 %**, which is the classic 1 large egg (50 g shelled) per 100 g flour. Hand-rolling can't compact dough the way a machine does, so it runs wetter than Sirman's machine-kneaded sheet doughs (28–33 %), and hand recipes in the wild span 37–50 %. The band (35–42 %) is a guess until you calibrate. Rest is 30 min for plain egg dough, rising to 60 min for all-coarse-semolina dough because coarse particles hydrate slowly; a knead test replaces the squeeze test ("rest 5 minutes before adding water", because semolina feels dry at first). The result also shows how big the sheet gets: dough weight ÷ (density × thickness), with thickness per shape (ribbons ~1 mm, ravioli ~0.8 mm, lasagne 1.5 mm) and cut widths from Bottene's die catalogue.
 
 **Asian alkaline noodles** are a reference recipe scaled linearly from the egg weight, shown with baker's percentages: egg 35 %, baked baking soda (sodium carbonate) 1.5 %, salt 0.7 %, added water 10–17 % (starts at 10 %) — all of flour weight. The pre-bake baking-soda weight is shown (÷ 0.631). Entering lye water replaces the baked soda; the app estimates its alkali content from a placeholder and flags it **unvalidated**. With a press, the app also notes that this recipe (36–43 %) is wetter than the extrusion band.
 
@@ -81,7 +81,7 @@ Shown in the UI with an "uncalibrated" badge wherever they affect a result.
 | `ROLLED_HYDRATION` | 37.5 % (35–42 %) | Published figures span 28–50 %; replaced by your calibrated target |
 | `ROLLED_REST` | 30 min, up to 60 for all-coarse semolina | Cook-blog consensus, not measured |
 | `DOUGH_DENSITY` | 1.1 g/cm³ | Only converts dough weight to sheet area |
-| Roll thicknesses (`src/data/rolled.ts`) | ribbons 1, ravioli 0.8, lasagne 1 mm | Sources disagree, especially for lasagne (0.5–1 mm) |
+| Roll thicknesses (`src/data/rolled.ts`) | ribbons 1, ravioli 0.8, lasagne 1.5 mm | Sources disagree, especially for lasagne (0.5–1 mm) |
 
 ## Assumptions
 
