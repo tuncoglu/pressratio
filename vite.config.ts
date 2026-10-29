@@ -23,7 +23,7 @@ function precacheManifest() {
         }
       };
       walk(outDir);
-      const urls = ['./', ...files.filter((f) => f !== 'sw.js').map((f) => `./${f}`)];
+      const urls = ['./', ...files.filter((f) => !['sw.js', 'index.html', '_headers', '_redirects'].includes(f)).map((f) => `./${f}`)];
       const swPath = join(outDir, 'sw.js');
       const cacheId = String(Date.now());
       writeFileSync(
