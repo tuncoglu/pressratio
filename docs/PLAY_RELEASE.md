@@ -26,7 +26,7 @@ Console app id `4976268788888229734` (developer id `5715235607958126388`, consol
 
 ## Left to do
 
-1. Install as a tester (opt in via the link above, then install from Play) and confirm the app opens full-screen with no URL bar and the location button works.
+1. Done 2026-10-31 on a Pixel 10 Pro XL: installed 1.0.2 from Play (the first install may serve an older cached version; tap Update), opens full-screen with no URL bar, and "Use my location" returns the outdoor temperature once Chrome's site setting for the site is Ask/Allow.
 2. Wait for Google's review of the production release (Publishing overview > Submission activity), then check the public listing and install from Play.
 
 Deploy command (from a scratch dir, after `npm run build`):
@@ -43,7 +43,7 @@ Symptom in versions 1 and 2: "Use my location" always said "Location permission 
 - Bubblewrap 1.27.0 generates `DelegationService` with `android:enabled="@bool/enableNotification"`, which follows `enableNotifications` (false). The location handler lives in that service, so delegation could never work. Enabling the flag (without notifications) registers the service, but Chrome still logs `cr_TWAClient: Unable to request location permission`, never binds the service, and tells the page "denied". Not fixed by that.
 - With `features` empty in `twa-manifest.json` (delegation off), Chrome shows its normal "wants to use your device's location" prompt for the site, which is what the page needs.
 
-So `features` is `{}` and the wrapper declares no location permissions; the site asks through Chrome. Do not turn `locationDelegation` back on without testing on a real device. Data safety still says location is collected and shared with Open-Meteo (the page does that), unchanged. Chrome remembers the answer per site: "Never allow" blocks it until reset in Chrome's site settings (App info > Storage > Manage space opens them).
+So `features` is `{}` and the wrapper declares no location permissions; the site asks through Chrome. Do not turn `locationDelegation` back on without testing on a real device. Data safety still says location is collected and shared with Open-Meteo (the page does that), unchanged. Chrome remembers the answer per site: a "Never allow" (or several dismissed prompts) blocks it with no further prompt, and the page just gets "denied". Reset it in Chrome: menu > Settings > Site settings > Location > pasta.sourdoughcalculator.uk > Ask. This is what made 1.0.2 look broken during testing on 2026-10-31 (the app's own "Manage space" shortcut did not open these settings on that phone).
 
 ## App language
 
