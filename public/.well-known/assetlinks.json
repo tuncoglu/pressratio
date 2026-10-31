@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.sourdough.pasta",
+      "sha256_cert_fingerprints": [
+        "6B:5A:6D:5E:E3:BA:FE:0F:8E:B1:1E:57:54:ED:EF:44:4D:C5:6F:C9:50:C1:1B:F5:EF:C9:AD:18:30:65:13:43",
+        "01:95:73:31:67:E0:3D:58:5C:8A:86:2C:6C:95:06:B0:02:F4:AD:55:52:DA:E3:E4:B5:63:96:76:0A:1B:9D:D2"
+      ]
+    }
+  }
+]

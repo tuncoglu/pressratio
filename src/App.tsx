@@ -74,6 +74,10 @@ export default function App() {
         )}
       </main>
 
+      <footer className="legal">
+        <a href="./privacy/">Privacy policy</a>
+      </footer>
+
       <nav className="tabs" aria-label="Screens">
         <button type="button" className={tab === 'calc' ? 'on' : ''} aria-current={tab === 'calc'} onClick={() => setTab('calc')}>
           Calculator

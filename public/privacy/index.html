@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#2b1d12" />
+    <meta name="description" content="Privacy policy for the Pasta &amp; Noodle Calculator app and website." />
+    <link rel="icon" type="image/png" href="../icons/icon-192.png" />
+    <title>Privacy policy - Pasta &amp; Noodle Calculator</title>
+    <style>
+      :root {
+        --bg: #f6efe3; --card: #fffdf8; --ink: #1d140c; --muted: #5d4c3b; --line: #cdbca3;
+        --brand: #7a3f10; --head: #2b1d12; --focus: #0b5fd6;
+        color-scheme: light dark;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root { --bg: #17100a; --card: #231810; --ink: #fbf3e6; --muted: #cdbba3; --line: #5a4733; --brand: #e9a35f; --focus: #7db4ff; }
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font: 18px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+      header { background: var(--head); color: #fbf3e6; padding: calc(14px + env(safe-area-inset-top)) 16px 14px; }
+      header p { margin: 0; max-width: 680px; margin-inline: auto; }
+      header a { color: #e9d3b0; }
+      main { max-width: 680px; margin: 0 auto; padding: 16px 16px calc(32px + env(safe-area-inset-bottom)); }
+      h1 { font-size: 1.4rem; line-height: 1.2; margin: 0 0 4px; }
+      h2 { font-size: 1.15rem; margin: 1.6rem 0 0.3rem; }
+      p, li { margin: 0.4rem 0; }
+      a { color: var(--brand); }
+      :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+      .meta { color: var(--muted); font-size: 0.9rem; }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 4px 16px 12px; margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <header><p><a href="../">&larr; Back to the calculator</a></p></header>
+    <main>
+      <h1>Privacy policy</h1>
+      <p class="meta">Pasta &amp; Noodle Calculator (Android app and website at pasta.sourdoughcalculator.uk). Last updated 31 October 2026.</p>
+
+      <div class="card">
+        <h2>The short version</h2>
+        <p>No account, no ads, no analytics, no tracking. Everything you enter stays on your device. The only time anything leaves it is when you ask for the local temperature, and then only rounded coordinates are sent.</p>
+      </div>
+
+      <h2>What is stored on your device</h2>
+      <p>Your calculator settings, the batch log you keep, and your calibration results are saved in your browser's local storage on your device (the Android app is a wrapper around the same website and uses the same storage). We have no copy of it and cannot see it. You can export it as a JSON file, import it back, or delete it by clearing the app's storage in Android settings.</p>
+
+      <h2>Location (optional)</h2>
+      <p>The calculator can look up the outdoor temperature to adjust the dough rest time. This only happens if you tap &ldquo;Use my location&rdquo;, or if you have ticked &ldquo;Detect automatically when I open the app&rdquo;. Your device then asks your permission to share an approximate location.</p>
+      <ul>
+        <li>Your latitude and longitude are rounded to about 1 km on your device, then sent to <a href="https://open-meteo.com/">Open-Meteo</a> (api.open-meteo.com) to get the current temperature. Open-Meteo is a free weather service; see its own privacy policy for how it handles requests.</li>
+        <li>Nothing else is sent: no identifier, no account, no device details we add. Like any web request, Open-Meteo receives your IP address.</li>
+        <li>The location is not stored by us, and the app keeps only the temperature that came back, not your coordinates.</li>
+        <li>If you decline, or you are offline, you simply type the temperature yourself. Nothing else in the app needs location.</li>
+      </ul>
+
+      <h2>Our servers</h2>
+      <p>The website is hosted by Cloudflare. Like any web host, Cloudflare processes your IP address and request details to deliver the pages and may keep standard server logs. We do not run analytics or set cookies, and we do not combine any of this with other data. Once the app has loaded, it works offline.</p>
+
+      <h2>Children</h2>
+      <p>The app is a kitchen calculator and is not directed at children. It collects no personal information from anyone.</p>
+
+      <h2>Sharing and selling</h2>
+      <p>We do not sell or share your data, and we do not use it for advertising. The one third party involved is Open-Meteo, only as described above and only when you ask for the temperature.</p>
+
+      <h2>Changes</h2>
+      <p>If this policy changes, the new version will be posted here with a new date.</p>
+
+      <h2>Contact</h2>
+      <p>Questions or requests: <a href="mailto:info@sourdoughcalculator.uk">info@sourdoughcalculator.uk</a>.</p>
+    </main>
+  </body>
+</html>

@@ -23,6 +23,10 @@ npm run preview    # serve dist/ locally to try the PWA / offline mode
 
 `npm run icons` regenerates the PWA icons in `public/icons/` (no dependencies).
 
+## Android app (Google Play)
+
+The app also ships on Google Play as **Pasta & Noodle Calculator** (`com.sourdough.pasta`), a Trusted Web Activity that opens this site full-screen (`twa/`, built with Bubblewrap). It needs `public/.well-known/assetlinks.json` to list the signing certificate, and the policy page at `/privacy/`. Build, signing, listing text, graphics and Console answers are in [`docs/PLAY_RELEASE.md`](docs/PLAY_RELEASE.md) and [`store/LISTING.md`](store/LISTING.md).
+
 ## Layout
 
 | Path | What |

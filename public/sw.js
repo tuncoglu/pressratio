@@ -40,6 +40,15 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
 
   if (req.mode === 'navigate') {
+    // The privacy page is its own document; every other navigation gets the app shell.
+    const scope = new URL(self.registration.scope).pathname;
+    const path = new URL(req.url).pathname;
+    if (path === scope + 'privacy' || path === scope + 'privacy/') {
+      event.respondWith(
+        caches.match('./privacy/index.html').then((hit) => hit || fetch(req)),
+      );
+      return;
+    }
     event.respondWith(caches.match('./').then((hit) => hit || fetch(req)));
     return;
   }

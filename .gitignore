@@ -1,2 +1,10 @@
 node_modules
 dist
+
+# Android wrapper (Bubblewrap): keep twa-manifest.json and the generated project, drop build output
+twa/**/build/
+twa/.gradle/
+twa/*.apk
+twa/*.aab
+twa/*.idsig
+twa/local.properties

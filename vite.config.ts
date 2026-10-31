@@ -23,7 +23,9 @@ function precacheManifest() {
         }
       };
       walk(outDir);
-      const urls = ['./', ...files.filter((f) => !['sw.js', 'index.html', '_headers', '_redirects'].includes(f)).map((f) => `./${f}`)];
+      // .well-known/ is for Android's Digital Asset Links check, never for the app itself.
+      const skip = (f: string) => ['sw.js', 'index.html', '_headers', '_redirects'].includes(f) || f.startsWith('.well-known/');
+      const urls = ['./', ...files.filter((f) => !skip(f)).map((f) => `./${f}`)];
       const swPath = join(outDir, 'sw.js');
       const cacheId = String(Date.now());
       writeFileSync(
