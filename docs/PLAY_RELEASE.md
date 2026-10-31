@@ -12,7 +12,7 @@ Console app id `4976268788888229734` (developer id `5715235607958126388`, consol
 | Item | State |
 | --- | --- |
 | Wrapper project | generated in `twa/` (targetSdk 36, minSdk 24, location delegation on) |
-| Bundle | `twa/app-release-bundle.aab` (versionCode 1, 1.0.0) uploaded to the **internal** track as a **draft** (not rolled out, no testers picked) |
+| Bundle | `twa/app-release-bundle.aab` (versionCode 1, 1.0.0) **rolled out to internal testing 2026-10-31** (tester list "HR Buzz testers"; opt-in link https://play.google.com/apps/internaltest/4700102875244577146; no review needed for internal) |
 | Upload key | `~/.android-keys/pasta-upload.jks`, alias `pasta-upload`, password in `~/.android-keys/CREDENTIALS.txt`, SHA-256 `01:95:73:31:...:9D:D2`. **Back it up.** |
 | Play app signing key | SHA-256 `6B:5A:6D:5E:E3:BA:FE:0F:8E:B1:1E:57:54:ED:EF:44:4D:C5:6F:C9:50:C1:1B:F5:EF:C9:AD:18:30:65:13:43` (Console > App signing) |
 | Privacy policy page | `public/privacy/index.html` (served at `/privacy/`), linked in the app footer; **deployed 2026-10-31** (Pages project `pasta`, wrangler 4.155.0 direct upload) |
@@ -24,7 +24,7 @@ Console app id `4976268788888229734` (developer id `5715235607958126388`, consol
 
 ## Left to do
 
-1. Internal testing: pick a tester list (the account has "HR Buzz testers"), preview and roll out the internal draft, install on a phone, confirm the app opens full-screen with no URL bar.
+1. Install as a tester (opt in via the link above, then install from Play) and confirm the app opens full-screen with no URL bar and the location button works.
 2. Send for review from Publishing overview (user's call), then closed/production.
 
 Deploy command (from a scratch dir, after `npm run build`):
