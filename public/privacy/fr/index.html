@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#2b1d12" />
+    <meta name="description" content="Politique de confidentialité de l'appli et du site Calculateur de pâte à pâtes et nouilles." />
+    <link rel="icon" type="image/png" href="../../icons/icon-192.png" />
+    <title>Politique de confidentialité - Calculateur de pâte à pâtes et nouilles</title>
+    <style>
+      :root {
+        --bg: #f6efe3; --card: #fffdf8; --ink: #1d140c; --muted: #5d4c3b; --line: #cdbca3;
+        --brand: #7a3f10; --head: #2b1d12; --focus: #0b5fd6;
+        color-scheme: light dark;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root { --bg: #17100a; --card: #231810; --ink: #fbf3e6; --muted: #cdbba3; --line: #5a4733; --brand: #e9a35f; --focus: #7db4ff; }
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font: 18px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+      header { background: var(--head); color: #fbf3e6; padding: calc(14px + env(safe-area-inset-top)) 16px 14px; }
+      header p { margin: 0; max-width: 680px; margin-inline: auto; }
+      header a { color: #e9d3b0; }
+      main { max-width: 680px; margin: 0 auto; padding: 16px 16px calc(32px + env(safe-area-inset-bottom)); }
+      h1 { font-size: 1.4rem; line-height: 1.2; margin: 0 0 4px; }
+      h2 { font-size: 1.15rem; margin: 1.6rem 0 0.3rem; }
+      p, li { margin: 0.4rem 0; }
+      a { color: var(--brand); }
+      :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+      .meta { color: var(--muted); font-size: 0.9rem; }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 4px 16px 12px; margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <header><p><a href="../../">&larr; Retour au calculateur</a></p></header>
+    <main>
+      <h1>Politique de confidentialité</h1>
+      <p class="meta">Calculateur de pâte à pâtes et nouilles (appli Android et site web pasta.sourdoughcalculator.uk). Dernière mise à jour : 31 octobre 2026.</p>
+      <p class="meta">Ceci est une traduction de la politique de confidentialité en anglais. En cas de différence, la version anglaise prévaut : <a href="../">version anglaise</a>.</p>
+
+      <div class="card">
+        <h2>En bref</h2>
+        <p>Pas de compte, pas de publicité, pas d'analyses, pas de suivi. Tout ce que vous saisissez reste sur votre appareil. Rien ne le quitte, sauf quand vous demandez la température locale, et seules des coordonnées arrondies sont alors envoyées.</p>
+      </div>
+
+      <h2>Ce qui est stocké sur votre appareil</h2>
+      <p>Les réglages de votre calculateur, le journal des fournées que vous tenez et vos résultats de calibrage sont enregistrés dans le stockage local du navigateur de votre appareil (l'appli Android est une enveloppe autour du même site web et utilise le même stockage). Nous n'en avons aucune copie et ne pouvons pas les voir. Vous pouvez les exporter en fichier JSON, les réimporter ou les supprimer en vidant le stockage de l'appli dans les réglages d'Android.</p>
+
+      <h2>Position (facultatif)</h2>
+      <p>Le calculateur peut chercher la température extérieure pour ajuster le temps de repos de la pâte. Cela n'arrive que si vous touchez « Utiliser ma position » ou si vous avez coché « Détecter automatiquement à l'ouverture de l'appli ». Votre appareil vous demande alors la permission de partager une position approximative.</p><ul><li>Votre latitude et votre longitude sont arrondies à environ 1 km sur votre appareil, puis envoyées à <a href="https://open-meteo.com/">Open-Meteo</a> (api.open-meteo.com) pour obtenir la température actuelle. Open-Meteo est un service météo gratuit ; consultez sa propre politique de confidentialité pour savoir comment il traite les requêtes.</li><li>Rien d'autre n'est envoyé : aucun identifiant, aucun compte, aucune information d'appareil que nous ajouterions. Comme pour toute requête web, Open-Meteo reçoit votre adresse IP.</li><li>La position n'est pas stockée par nous, et l'appli ne conserve que la température reçue, pas vos coordonnées.</li><li>Si vous refusez, ou si vous êtes hors ligne, saisissez simplement la température vous-même. Rien d'autre dans l'appli n'a besoin de la position.</li></ul>
+
+      <h2>Nos serveurs</h2>
+      <p>Le site web est hébergé par Cloudflare. Comme tout hébergeur, Cloudflare traite votre adresse IP et les détails de la requête pour servir les pages et peut conserver des journaux de serveur standard. Nous n'utilisons ni analyses ni cookies, et nous ne croisons rien de tout cela avec d'autres données. Une fois chargée, l'appli fonctionne hors ligne.</p>
+
+      <h2>Enfants</h2>
+      <p>L'appli est un calculateur de cuisine et ne s'adresse pas aux enfants. Elle ne collecte aucune information personnelle, auprès de qui que ce soit.</p>
+
+      <h2>Partage et vente</h2>
+      <p>Nous ne vendons ni ne partageons vos données et ne les utilisons pas à des fins publicitaires. Le seul tiers concerné est Open-Meteo, uniquement comme décrit ci-dessus et uniquement lorsque vous demandez la température.</p>
+
+      <h2>Modifications</h2>
+      <p>Si cette politique change, la nouvelle version sera publiée ici avec une nouvelle date.</p>
+
+      <h2>Contact</h2>
+      <p>Questions ou demandes : <a href="mailto:info@sourdoughcalculator.uk">info@sourdoughcalculator.uk</a>.</p>
+    </main>
+  </body>
+</html>

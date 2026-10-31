@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from 'react';
 import { gToUnit, round, unitToG } from '../calc/calc';
 import type { Unit } from '../calc/types';
+import { n } from '../i18n';
 
 interface Props {
   /** Fixed DOM id, for focusing the field from outside. */
@@ -25,11 +26,11 @@ export function NumField({ id: fixedId, label, value, onChange, unit, nullable, 
   const autoId = useId();
   const id = fixedId ?? autoId;
   const show = (v: number | null) =>
-    v == null ? '' : String(round(unit ? gToUnit(v, unit) : v, unit === 'oz' ? 2 : 1));
+    v == null ? '' : n(round(unit ? gToUnit(v, unit) : v, unit === 'oz' ? 2 : 1));
   const [draft, setDraft] = useState(show(value));
 
   useEffect(() => {
-    const p = parseFloat(draft);
+    const p = parseFloat(draft.replace(',', '.'));
     const current = Number.isFinite(p) && p >= 0 ? (unit ? unitToG(p, unit) : p) : nullable ? null : 0;
     const same = current === value || (current != null && value != null && Math.abs(current - value) < 1e-6);
     if (!same) setDraft(show(value));

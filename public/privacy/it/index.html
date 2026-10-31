@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#2b1d12" />
+    <meta name="description" content="Informativa sulla privacy dell'app e del sito Calcolatore per impasti di pasta e noodles." />
+    <link rel="icon" type="image/png" href="../../icons/icon-192.png" />
+    <title>Informativa sulla privacy - Calcolatore per impasti di pasta e noodles</title>
+    <style>
+      :root {
+        --bg: #f6efe3; --card: #fffdf8; --ink: #1d140c; --muted: #5d4c3b; --line: #cdbca3;
+        --brand: #7a3f10; --head: #2b1d12; --focus: #0b5fd6;
+        color-scheme: light dark;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root { --bg: #17100a; --card: #231810; --ink: #fbf3e6; --muted: #cdbba3; --line: #5a4733; --brand: #e9a35f; --focus: #7db4ff; }
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font: 18px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+      header { background: var(--head); color: #fbf3e6; padding: calc(14px + env(safe-area-inset-top)) 16px 14px; }
+      header p { margin: 0; max-width: 680px; margin-inline: auto; }
+      header a { color: #e9d3b0; }
+      main { max-width: 680px; margin: 0 auto; padding: 16px 16px calc(32px + env(safe-area-inset-bottom)); }
+      h1 { font-size: 1.4rem; line-height: 1.2; margin: 0 0 4px; }
+      h2 { font-size: 1.15rem; margin: 1.6rem 0 0.3rem; }
+      p, li { margin: 0.4rem 0; }
+      a { color: var(--brand); }
+      :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+      .meta { color: var(--muted); font-size: 0.9rem; }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 4px 16px 12px; margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <header><p><a href="../../">&larr; Torna al calcolatore</a></p></header>
+    <main>
+      <h1>Informativa sulla privacy</h1>
+      <p class="meta">Calcolatore per impasti di pasta e noodles (app Android e sito web pasta.sourdoughcalculator.uk). Ultimo aggiornamento: 31 ottobre 2026.</p>
+      <p class="meta">Questa è una traduzione dell'informativa sulla privacy in inglese. In caso di differenze, prevale la versione inglese: <a href="../">versione inglese</a>.</p>
+
+      <div class="card">
+        <h2>In breve</h2>
+        <p>Nessun account, nessuna pubblicità, nessuna analisi, nessun tracciamento. Tutto ciò che inserisci resta sul tuo dispositivo. L'unico momento in cui qualcosa lo lascia è quando chiedi la temperatura locale, e allora vengono inviate solo coordinate arrotondate.</p>
+      </div>
+
+      <h2>Cosa viene salvato sul tuo dispositivo</h2>
+      <p>Le impostazioni del calcolatore, il registro impasti che tieni e i risultati di calibrazione vengono salvati nella memoria locale del browser del tuo dispositivo (l'app Android è un involucro dello stesso sito web e usa la stessa memoria). Non ne abbiamo alcuna copia e non possiamo vederli. Puoi esportarli come file JSON, reimportarli o eliminarli svuotando la memoria dell'app nelle impostazioni di Android.</p>
+
+      <h2>Posizione (facoltativa)</h2>
+      <p>Il calcolatore può cercare la temperatura esterna per regolare il tempo di riposo dell'impasto. Ciò avviene solo se tocchi «Usa la mia posizione» o se hai spuntato «Rileva automaticamente quando apro l'app». Il tuo dispositivo ti chiede allora il permesso di condividere una posizione approssimativa.</p><ul><li>Latitudine e longitudine vengono arrotondate a circa 1 km sul tuo dispositivo e poi inviate a <a href="https://open-meteo.com/">Open-Meteo</a> (api.open-meteo.com) per ottenere la temperatura attuale. Open-Meteo è un servizio meteo gratuito; consulta la sua informativa sulla privacy per sapere come tratta le richieste.</li><li>Non viene inviato altro: nessun identificativo, nessun account, nessun dato del dispositivo aggiunto da noi. Come ogni richiesta web, Open-Meteo riceve il tuo indirizzo IP.</li><li>La posizione non viene memorizzata da noi e l'app conserva solo la temperatura ricevuta, non le tue coordinate.</li><li>Se rifiuti, o sei offline, ti basta scrivere tu la temperatura. Nient'altro nell'app richiede la posizione.</li></ul>
+
+      <h2>I nostri server</h2>
+      <p>Il sito web è ospitato da Cloudflare. Come ogni servizio di hosting, Cloudflare tratta il tuo indirizzo IP e i dettagli della richiesta per consegnare le pagine e può conservare i normali log del server. Non usiamo analisi né cookie e non colleghiamo nulla di tutto ciò ad altri dati. Una volta caricata, l'app funziona offline.</p>
+
+      <h2>Minori</h2>
+      <p>L'app è un calcolatore da cucina e non è rivolta ai minori. Non raccoglie informazioni personali da nessuno.</p>
+
+      <h2>Condivisione e vendita</h2>
+      <p>Non vendiamo né condividiamo i tuoi dati e non li usiamo per la pubblicità. L'unica terza parte coinvolta è Open-Meteo, solo come descritto sopra e solo quando chiedi la temperatura.</p>
+
+      <h2>Modifiche</h2>
+      <p>Se questa informativa cambia, la nuova versione sarà pubblicata qui con una nuova data.</p>
+
+      <h2>Contatti</h2>
+      <p>Domande o richieste: <a href="mailto:info@sourdoughcalculator.uk">info@sourdoughcalculator.uk</a>.</p>
+    </main>
+  </body>
+</html>

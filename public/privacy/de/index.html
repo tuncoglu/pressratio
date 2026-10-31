@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#2b1d12" />
+    <meta name="description" content="Datenschutzerklärung für die App und Website Pasta- und Nudelteig-Rechner." />
+    <link rel="icon" type="image/png" href="../../icons/icon-192.png" />
+    <title>Datenschutzerklärung - Pasta- und Nudelteig-Rechner</title>
+    <style>
+      :root {
+        --bg: #f6efe3; --card: #fffdf8; --ink: #1d140c; --muted: #5d4c3b; --line: #cdbca3;
+        --brand: #7a3f10; --head: #2b1d12; --focus: #0b5fd6;
+        color-scheme: light dark;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root { --bg: #17100a; --card: #231810; --ink: #fbf3e6; --muted: #cdbba3; --line: #5a4733; --brand: #e9a35f; --focus: #7db4ff; }
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font: 18px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+      header { background: var(--head); color: #fbf3e6; padding: calc(14px + env(safe-area-inset-top)) 16px 14px; }
+      header p { margin: 0; max-width: 680px; margin-inline: auto; }
+      header a { color: #e9d3b0; }
+      main { max-width: 680px; margin: 0 auto; padding: 16px 16px calc(32px + env(safe-area-inset-bottom)); }
+      h1 { font-size: 1.4rem; line-height: 1.2; margin: 0 0 4px; }
+      h2 { font-size: 1.15rem; margin: 1.6rem 0 0.3rem; }
+      p, li { margin: 0.4rem 0; }
+      a { color: var(--brand); }
+      :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+      .meta { color: var(--muted); font-size: 0.9rem; }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 4px 16px 12px; margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <header><p><a href="../../">&larr; Zurück zum Rechner</a></p></header>
+    <main>
+      <h1>Datenschutzerklärung</h1>
+      <p class="meta">Pasta- und Nudelteig-Rechner (Android-App und Website unter pasta.sourdoughcalculator.uk). Zuletzt aktualisiert am 31. Oktober 2026.</p>
+      <p class="meta">Dies ist eine Übersetzung der englischen Datenschutzerklärung. Bei Abweichungen gilt die englische Fassung: <a href="../">englische Fassung</a>.</p>
+
+      <div class="card">
+        <h2>Die Kurzfassung</h2>
+        <p>Kein Konto, keine Werbung, keine Analyse, kein Tracking. Alles, was Sie eingeben, bleibt auf Ihrem Gerät. Nur wenn Sie die örtliche Temperatur abfragen, verlässt etwas Ihr Gerät, und dann werden ausschließlich gerundete Koordinaten gesendet.</p>
+      </div>
+
+      <h2>Was auf Ihrem Gerät gespeichert wird</h2>
+      <p>Ihre Rechnereinstellungen, das von Ihnen geführte Ansatzprotokoll und Ihre Kalibrierungsergebnisse werden im lokalen Speicher Ihres Browsers auf Ihrem Gerät abgelegt (die Android-App ist eine Hülle um dieselbe Website und nutzt denselben Speicher). Wir haben keine Kopie davon und können sie nicht einsehen. Sie können die Daten als JSON-Datei exportieren, wieder importieren oder löschen, indem Sie in den Android-Einstellungen den Speicher der App leeren.</p>
+
+      <h2>Standort (optional)</h2>
+      <p>Der Rechner kann die Außentemperatur abrufen, um die Ruhezeit des Teigs anzupassen. Das geschieht nur, wenn Sie auf „Meinen Standort verwenden“ tippen oder „Beim Öffnen der App automatisch ermitteln“ angekreuzt haben. Ihr Gerät fragt dann um Erlaubnis, einen ungefähren Standort zu teilen.</p><ul><li>Ihr Breiten- und Längengrad werden auf Ihrem Gerät auf etwa 1 km gerundet und dann an <a href="https://open-meteo.com/">Open-Meteo</a> (api.open-meteo.com) gesendet, um die aktuelle Temperatur abzurufen. Open-Meteo ist ein kostenloser Wetterdienst; wie er Anfragen behandelt, steht in seiner eigenen Datenschutzerklärung.</li><li>Es wird nichts anderes gesendet: keine Kennung, kein Konto, keine von uns hinzugefügten Gerätedaten. Wie bei jeder Webanfrage erhält Open-Meteo Ihre IP-Adresse.</li><li>Der Standort wird von uns nicht gespeichert, und die App behält nur die zurückgelieferte Temperatur, nicht Ihre Koordinaten.</li><li>Wenn Sie ablehnen oder offline sind, geben Sie die Temperatur einfach selbst ein. Nichts anderes in der App braucht den Standort.</li></ul>
+
+      <h2>Unsere Server</h2>
+      <p>Die Website wird von Cloudflare gehostet. Wie jeder Webhoster verarbeitet Cloudflare Ihre IP-Adresse und Anfragedetails, um die Seiten auszuliefern, und kann übliche Serverprotokolle führen. Wir betreiben keine Analyse, setzen keine Cookies und verknüpfen nichts davon mit anderen Daten. Sobald die App geladen ist, funktioniert sie offline.</p>
+
+      <h2>Kinder</h2>
+      <p>Die App ist ein Küchenrechner und richtet sich nicht an Kinder. Sie erhebt von niemandem personenbezogene Daten.</p>
+
+      <h2>Weitergabe und Verkauf</h2>
+      <p>Wir verkaufen oder teilen Ihre Daten nicht und verwenden sie nicht für Werbung. Der einzige beteiligte Dritte ist Open-Meteo, nur wie oben beschrieben und nur, wenn Sie die Temperatur abfragen.</p>
+
+      <h2>Änderungen</h2>
+      <p>Ändert sich diese Erklärung, wird die neue Fassung mit neuem Datum hier veröffentlicht.</p>
+
+      <h2>Kontakt</h2>
+      <p>Fragen oder Anliegen: <a href="mailto:info@sourdoughcalculator.uk">info@sourdoughcalculator.uk</a>.</p>
+    </main>
+  </body>
+</html>

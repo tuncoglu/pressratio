@@ -40,12 +40,14 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
 
   if (req.mode === 'navigate') {
-    // The privacy page is its own document; every other navigation gets the app shell.
+    // The privacy pages are their own documents; every other navigation gets the app shell.
     const scope = new URL(self.registration.scope).pathname;
     const path = new URL(req.url).pathname;
-    if (path === scope + 'privacy' || path === scope + 'privacy/') {
+    // /privacy/ is English; /privacy/<lang>/ are its translations (see scripts/make-privacy.mjs).
+    const m = path.startsWith(scope) && path.slice(scope.length).match(/^privacy(?:\/(tr|de|es|fr|it))?\/?$/);
+    if (m) {
       event.respondWith(
-        caches.match('./privacy/index.html').then((hit) => hit || fetch(req)),
+        caches.match('./privacy/' + (m[1] ? m[1] + '/' : '') + 'index.html').then((hit) => hit || fetch(req)),
       );
       return;
     }

@@ -36,6 +36,10 @@ Deploy command (from a scratch dir, after `npm run build`):
 
 With Bubblewrap 1.27.0 + `androidbrowserhelper` 2.7.4, `enableSiteSettingsShortcut: false` omits `ManageDataLauncherActivity` from the manifest, but the library still calls `setComponentEnabledSetting` on it at every launch. The app then crashes immediately (`Component class r0.u does not exist`; `r0.u` is that class after R8). versionCode 1 shipped like this. Keep the flag `true` (it only adds a "Site settings" entry on the app info page). Verified 2026-10-31 by sideloading on a Pixel 10 Pro XL: launches full-screen, no crash.
 
+## App language (i18n branch, not yet released)
+
+The web app is now translated into tr, de, es, fr and it (see the README's Languages section), so the translated store listings below no longer promise a language the app lacks. It ships by deploying the website; no Play release is needed because the TWA just opens the site. The footer links to `/privacy/<lang>/` for non-English users; the Play Console privacy URL stays the English `/privacy/`.
+
 ## Translated store listings (2026-10-31)
 
 Console > Grow users > Translations > **Store listings and products** > Create order > *Machine translation at no cost* (the order form preselects paid human translation, so check). Then "Review and apply" per language. Reopening a draft resets it to Gemini's original text, so make all edits in one go before Apply. A separate **App strings** translation page exists (translates `strings.xml` in future bundles); it is not enabled because the app is a web wrapper with almost no Android strings.

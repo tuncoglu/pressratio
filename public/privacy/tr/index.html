@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#2b1d12" />
+    <meta name="description" content="Makarna ve Erişte Hesaplayıcısı uygulaması ve web sitesi için gizlilik politikası." />
+    <link rel="icon" type="image/png" href="../../icons/icon-192.png" />
+    <title>Gizlilik politikası - Makarna ve Erişte Hesaplayıcısı</title>
+    <style>
+      :root {
+        --bg: #f6efe3; --card: #fffdf8; --ink: #1d140c; --muted: #5d4c3b; --line: #cdbca3;
+        --brand: #7a3f10; --head: #2b1d12; --focus: #0b5fd6;
+        color-scheme: light dark;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root { --bg: #17100a; --card: #231810; --ink: #fbf3e6; --muted: #cdbba3; --line: #5a4733; --brand: #e9a35f; --focus: #7db4ff; }
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font: 18px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+      header { background: var(--head); color: #fbf3e6; padding: calc(14px + env(safe-area-inset-top)) 16px 14px; }
+      header p { margin: 0; max-width: 680px; margin-inline: auto; }
+      header a { color: #e9d3b0; }
+      main { max-width: 680px; margin: 0 auto; padding: 16px 16px calc(32px + env(safe-area-inset-bottom)); }
+      h1 { font-size: 1.4rem; line-height: 1.2; margin: 0 0 4px; }
+      h2 { font-size: 1.15rem; margin: 1.6rem 0 0.3rem; }
+      p, li { margin: 0.4rem 0; }
+      a { color: var(--brand); }
+      :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+      .meta { color: var(--muted); font-size: 0.9rem; }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 4px 16px 12px; margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <header><p><a href="../../">&larr; Hesaplayıcıya dön</a></p></header>
+    <main>
+      <h1>Gizlilik politikası</h1>
+      <p class="meta">Makarna ve Erişte Hesaplayıcısı (Android uygulaması ve pasta.sourdoughcalculator.uk web sitesi). Son güncelleme: 31 Ekim 2026.</p>
+      <p class="meta">Bu, İngilizce gizlilik politikasının bir çevirisidir. Herhangi bir fark olursa İngilizce sürüm geçerlidir: <a href="../">İngilizce sürüm</a>.</p>
+
+      <div class="card">
+        <h2>Kısaca</h2>
+        <p>Hesap yok, reklam yok, analiz yok, takip yok. Girdiğiniz her şey cihazınızda kalır. Cihazınızdan bir şeyin çıktığı tek an yerel sıcaklığı istediğiniz zamandır ve o zaman da yalnızca yuvarlanmış koordinatlar gönderilir.</p>
+      </div>
+
+      <h2>Cihazınızda neler saklanır</h2>
+      <p>Hesaplayıcı ayarlarınız, tuttuğunuz parti günlüğü ve kalibrasyon sonuçlarınız, cihazınızdaki tarayıcının yerel depolamasına kaydedilir (Android uygulaması aynı web sitesinin bir sarmalayıcısıdır ve aynı depolamayı kullanır). Bunların bir kopyası bizde yoktur ve göremeyiz. JSON dosyası olarak dışa aktarabilir, geri içe aktarabilir veya Android ayarlarından uygulamanın depolamasını temizleyerek silebilirsiniz.</p>
+
+      <h2>Konum (isteğe bağlı)</h2>
+      <p>Hesaplayıcı, hamur dinlenme süresini ayarlamak için dış hava sıcaklığını sorgulayabilir. Bu yalnızca «Konumumu kullan» düğmesine dokunursanız ya da «Uygulamayı açtığımda otomatik algıla» kutusunu işaretlediyseniz gerçekleşir. Cihazınız bunun üzerine yaklaşık konumu paylaşmak için izninizi ister.</p><ul><li>Enleminiz ve boylamınız cihazınızda yaklaşık 1 km'ye yuvarlanır, ardından güncel sıcaklığı almak için <a href="https://open-meteo.com/">Open-Meteo</a>'ya (api.open-meteo.com) gönderilir. Open-Meteo ücretsiz bir hava durumu servisidir; isteklerinizi nasıl işlediği için kendi gizlilik politikasına bakın.</li><li>Başka hiçbir şey gönderilmez: bizim eklediğimiz bir tanımlayıcı, hesap veya cihaz bilgisi yoktur. Her web isteği gibi Open-Meteo da IP adresinizi alır.</li><li>Konum bizim tarafımızdan saklanmaz ve uygulama koordinatlarınızı değil, yalnızca dönen sıcaklığı tutar.</li><li>Reddederseniz veya çevrimdışıysanız sıcaklığı kendiniz yazarsınız. Uygulamada başka hiçbir şey konuma ihtiyaç duymaz.</li></ul>
+
+      <h2>Sunucularımız</h2>
+      <p>Web sitesi Cloudflare tarafından barındırılır. Her web barındırıcısı gibi Cloudflare da sayfaları iletmek için IP adresinizi ve istek ayrıntılarını işler ve standart sunucu günlükleri tutabilir. Analiz çalıştırmayız, çerez kullanmayız ve bunların hiçbirini başka verilerle birleştirmeyiz. Uygulama yüklendikten sonra çevrimdışı çalışır.</p>
+
+      <h2>Çocuklar</h2>
+      <p>Uygulama bir mutfak hesaplayıcısıdır ve çocuklara yönelik değildir. Hiç kimseden kişisel bilgi toplamaz.</p>
+
+      <h2>Paylaşım ve satış</h2>
+      <p>Verilerinizi satmayız veya paylaşmayız ve reklam için kullanmayız. Dahil olan tek üçüncü taraf Open-Meteo'dur; yalnızca yukarıda anlatıldığı şekilde ve yalnızca siz sıcaklığı istediğinizde.</p>
+
+      <h2>Değişiklikler</h2>
+      <p>Bu politika değişirse, yeni sürüm yeni bir tarihle burada yayımlanır.</p>
+
+      <h2>İletişim</h2>
+      <p>Sorular veya talepler için: <a href="mailto:info@sourdoughcalculator.uk">info@sourdoughcalculator.uk</a>.</p>
+    </main>
+  </body>
+</html>

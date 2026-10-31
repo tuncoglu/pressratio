@@ -95,7 +95,7 @@ export default function App() {
             ))}
           </select>
         </label>
-        <a href="./privacy/">{t('legal.privacy')}</a>
+        <a href={state.locale === 'en' ? './privacy/' : `./privacy/${state.locale}/`}>{t('legal.privacy')}</a>
       </footer>
 
       <nav className="tabs" aria-label={t('app.screens')}>
