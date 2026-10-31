@@ -21,7 +21,8 @@ Console app id `4976268788888229734` (developer id `5715235607958126388`, consol
 | Store settings | category Food & drink, contact info@sourdoughcalculator.uk + https://pasta.sourdoughcalculator.uk |
 | Default store listing | title, short + full description (plain text, "\u2022" bullets), icon, feature graphic, 7 screenshots saved; icon + feature graphic labelled as AI-generated; status "Ready to send for review" |
 | Production | versionCode 2 (1.0.1), full rollout, all available countries (set on the Production > Countries/regions tab; the API refuses a release with none). Committed 2026-10-31; Play ran its pre-review checks and sends it for review by itself. The open-testing country changes were bundled into the same submission. |
-| Sent for review | **yes** (2026-10-31, via Publishing overview "Changes in review") |
+| Store listing translations | Machine-translated (Play's Gemini service, free, order 16c694dd1v2, 2026-10-31) into tr-TR, de-DE, es-ES, fr-FR, it-IT and applied as store listings. Gemini overshot the 30/80-character title/short limits for tr, es, fr, it, so those were trimmed by hand (see below). The app UI itself is English only. Not proofread by a native speaker beyond Turkish. |
+| Sent for review | **yes** (2026-10-31, via Publishing overview "Changes in review"). Submitted a second time the same day with the five translated listings, which cancelled and restarted the first review (Play warns about this). |
 
 ## Left to do
 
@@ -34,6 +35,20 @@ Deploy command (from a scratch dir, after `npm run build`):
 ## Known issue: keep `enableSiteSettingsShortcut` true
 
 With Bubblewrap 1.27.0 + `androidbrowserhelper` 2.7.4, `enableSiteSettingsShortcut: false` omits `ManageDataLauncherActivity` from the manifest, but the library still calls `setComponentEnabledSetting` on it at every launch. The app then crashes immediately (`Component class r0.u does not exist`; `r0.u` is that class after R8). versionCode 1 shipped like this. Keep the flag `true` (it only adds a "Site settings" entry on the app info page). Verified 2026-10-31 by sideloading on a Pixel 10 Pro XL: launches full-screen, no crash.
+
+## Translated store listings (2026-10-31)
+
+Console > Grow users > Translations > **Store listings and products** > Create order > *Machine translation at no cost* (the order form preselects paid human translation, so check). Then "Review and apply" per language. Reopening a draft resets it to Gemini's original text, so make all edits in one go before Apply. A separate **App strings** translation page exists (translates `strings.xml` in future bundles); it is not enabled because the app is a web wrapper with almost no Android strings.
+
+| Lang | Title (30) | Short description (80) |
+| --- | --- | --- |
+| tr-TR | Makarna & Erişte Hesaplayıcısı | El presi, ekstrüder ve açma makarna için makarna ve erişte hamuru hidrasyonu |
+| de-DE | Pasta- und Nudelrechner | Teighydratation für Pasta und Nudeln bei Handpressen, Extrudern und Nudelwalzen |
+| es-ES | Calculadora de pasta y fideos | Hidratación de masa para pasta y fideos con prensa manual, extrusora o rodillo |
+| fr-FR | Calculateur Pâtes & Nouilles | Hydratation de pâte à pâtes et nouilles : presse, extrudeuse ou laminoir |
+| it-IT | Calcolatore pasta e noodles | Idratazione dell'impasto per pasta e noodles: pressa, estrusore, mattarello |
+
+Turkish full description edits: "karbonat ağırlığı" to "kabartma sodası ağırlığı", "analiz yok" to "analitik yok". The other full descriptions are Gemini's text, unedited.
 
 ## Why the asset links matter
 
