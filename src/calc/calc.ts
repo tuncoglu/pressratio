@@ -54,15 +54,27 @@ import type {
   Unit,
   Warning,
 } from './types';
+import { m, n, t, tx, type Msg } from '../i18n';
 
 export const FLOUR_KEYS: FlourKey[] = ['type00', 'fineSemolina', 'coarseSemolina', 'breadFlour'];
 
-export const FLOUR_LABELS: Record<FlourKey, string> = {
-  type00: 'Type 00',
-  fineSemolina: 'Fine semolina',
-  coarseSemolina: 'Coarse semolina',
-  breadFlour: 'Bread flour',
+export const FLOUR_LABELS: Record<FlourKey, Msg> = {
+  type00: m('flour.type00'),
+  fineSemolina: m('flour.fineSemolina'),
+  coarseSemolina: m('flour.coarseSemolina'),
+  breadFlour: m('flour.breadFlour'),
 };
+
+/** Lower-case forms for use inside a sentence (German keeps its capitals, so this is its own set). */
+export const FLOUR_LABELS_LC: Record<FlourKey, Msg> = {
+  type00: m('flour.lc.type00'),
+  fineSemolina: m('flour.lc.fineSemolina'),
+  coarseSemolina: m('flour.lc.coarseSemolina'),
+  breadFlour: m('flour.lc.breadFlour'),
+};
+
+export const flourName = (k: FlourKey): string => tx(FLOUR_LABELS[k]);
+export const flourNameLc = (k: FlourKey): string => tx(FLOUR_LABELS_LC[k]);
 
 // ---- Units -------------------------------------------------------------
 
@@ -76,8 +88,8 @@ export function unitToG(value: number, unit: Unit): number {
 
 /** "525 g" or "18.5 oz". */
 export function formatAmount(g: number, unit: Unit): string {
-  if (unit === 'oz') return `${round(g / GRAMS_PER_OUNCE, 2)} oz`;
-  return `${round(g, g < 20 ? 1 : 0)} g`;
+  if (unit === 'oz') return `${n(round(g / GRAMS_PER_OUNCE, 2))} oz`;
+  return `${n(round(g, g < 20 ? 1 : 0))} g`;
 }
 
 export function round(n: number, digits = 0): number {
@@ -91,7 +103,7 @@ export function formatTsp(waterG: number): string {
   const quarters = Math.max(1, Math.round((waterG / TSP_WATER_G) * 4));
   const whole = Math.floor(quarters / 4);
   const frac = ['', '¼', '½', '¾'][quarters % 4];
-  return `${whole > 0 ? whole : ''}${frac} tsp`;
+  return t('fmt.tsp', { v: `${whole > 0 ? whole : ''}${frac}` });
 }
 
 // ---- Flour blend -------------------------------------------------------
@@ -109,20 +121,20 @@ export function isValidBlend(blend: Blend): boolean {
   return FLOUR_KEYS.every((k) => blend[k] >= 0) && Math.abs(blendSum(blend) - 100) < 1e-9;
 }
 
-export const BLEND_PRESETS: { id: string; label: string; blend: Blend }[] = [
+export const BLEND_PRESETS: { id: string; label: Msg; blend: Blend }[] = [
   {
     id: 'coarse100',
-    label: '100 % coarse semolina',
+    label: m('blend.preset.coarse100'),
     blend: { type00: 0, fineSemolina: 0, coarseSemolina: 100, breadFlour: 0 },
   },
   {
     id: '70-30',
-    label: '70 % 00 / 30 % coarse',
+    label: m('blend.preset.70-30'),
     blend: { type00: 70, fineSemolina: 0, coarseSemolina: 30, breadFlour: 0 },
   },
   {
     id: '50-50',
-    label: '50 / 50 (00 + coarse)',
+    label: m('blend.preset.50-50'),
     blend: { type00: 50, fineSemolina: 0, coarseSemolina: 50, breadFlour: 0 },
   },
 ];
@@ -237,25 +249,17 @@ export function restPlan(blend: Blend, ambientC: number | null, mode: Mode = 'ex
   if (t < COLD_BELOW_C) base += REST.coldExtraMin;
   if (t > WARM_ABOVE_C) base -= REST.warmLessMin;
   const hold = holdLimitH(ambientC);
-  const holdNote =
-    hold === HOLD_LIMIT.hotH
-      ? `It is above ${HOLD_LIMIT.hotAboveC} °C: raw-egg dough should spend no more than ${hold} hour unrefrigerated in total (USDA). Refrigerate it wrapped if holding longer, then let it come back to room temperature before rolling.`
-      : `If you will hold the dough longer than ${hold} hours in total (raw egg, USDA guidance), refrigerate it wrapped, then let it come back to room temperature before rolling.`;
-  const notes = rolled
-    ? [
-        'Knead until smooth (about 8–10 minutes by hand), then wrap tightly and rest at room temperature. Wrapping stops a dry skin forming.',
-        'Coarse semolina hydrates slowly and feels dry and gritty at first. Judge the dough after the rest, not before. If it is still shaggy, add water in small steps and knead again.',
-        'If the sheet keeps springing back while you roll, the gluten is tight: cover it and rest 5–10 minutes. A longer rest (Sirman: hours, chilled) makes sheets stretchier.',
-        holdNote,
-      ]
+  const hot = hold === HOLD_LIMIT.hotH;
+  const hp = { c: HOLD_LIMIT.hotAboveC, h: hold };
+  const holdNote = hot ? m('rest.hold.hot', hp) : m('rest.hold.normal', hp);
+  const notes: Msg[] = rolled
+    ? [m('rest.rolled.knead'), m('rest.rolled.coarse'), m('rest.rolled.springback'), holdNote]
     : [
-    'Rest covered, at room temperature. Covering stops the crumbs drying out; chilling would slow the water uptake the rest is for, so never refrigerate a short rest.',
-    'Coarse semolina hydrates slowly (bigger particles take longer to wet through). If it is still powdery after the rest, add water in small steps and rest 5–10 min.',
-    hold === HOLD_LIMIT.hotH
-      ? `It is above ${HOLD_LIMIT.hotAboveC} °C: raw-egg dough should spend no more than ${hold} hour unrefrigerated in total (USDA). Refrigerate covered if holding longer, then temper 20–30 min before pressing.`
-      : `If you will hold the mix longer than ${hold} hours in total (raw egg, USDA guidance), refrigerate it covered, then temper 20–30 min before loading the press.`,
-    'Never load cold dough into a manual press: cold dough is stiffer and much harder to push through the die.',
-  ];
+        m('rest.ext.covered'),
+        m('rest.ext.coarse'),
+        hot ? m('rest.ext.hold.hot', hp) : m('rest.ext.hold.normal', hp),
+        m('rest.ext.cold'),
+      ];
   const span = rolled ? ROLLED_REST.spanMin : REST.spanMin;
   return { minMin: base, maxMin: base + span, coarseShare, holdLimitH: hold, notes };
 }
@@ -263,15 +267,12 @@ export function restPlan(blend: Blend, ambientC: number | null, mode: Mode = 'ex
 // ---- Main calculation --------------------------------------------------
 
 export const TEXTURE_TARGETS = {
-  extruded:
-    'Damp sand — should clump when squeezed, not form a smooth ball. Slightly crumbly is fine; powdery is not.',
-  alkaline:
-    'Stiff, shaggy crumbs that press together into a firm dough. Expect it to look drier than a hand-rolled noodle dough.',
-  rolled:
-    'A smooth, firm ball that springs back slowly when pressed: slightly tacky but not sticky. Coarse semolina can look rough and feel dry until it has rested.',
+  extruded: m('texture.extruded'),
+  alkaline: m('texture.alkaline'),
+  rolled: m('texture.rolled'),
 } as const;
 
-function emptyResult(input: CalcInput, status: CalcResult['status'], message: string): CalcResult {
+function emptyResult(input: CalcInput, status: CalcResult['status'], message: Msg): CalcResult {
   const eggShelledG = eggToShelledG(input.egg);
   return {
     status,
@@ -289,7 +290,7 @@ function emptyResult(input: CalcInput, status: CalcResult['status'], message: st
     flourBreakdownG: { type00: 0, fineSemolina: 0, coarseSemolina: 0, breadFlour: 0 },
     hydration: 0,
     hydrationRange: [0, 0],
-    textureTarget: '',
+    textureTarget: null,
     rest: restPlan(input.blend, input.ambientC, input.mode),
     ingredients: [],
     suggestedAddedWaterG: null,
@@ -321,7 +322,7 @@ export function calculate(raw: CalcInput): CalcResult {
   };
 
   if (!isValidBlend(input.blend)) {
-    return emptyResult(input, 'invalid-blend', 'Flour blend must add up to 100 %.');
+    return emptyResult(input, 'invalid-blend', m('msg.blend'));
   }
 
   const eggShelledG = eggToShelledG(input.egg);
@@ -336,7 +337,7 @@ export function calculate(raw: CalcInput): CalcResult {
     warnings.push({
       id: 'rolled-all-coarse',
       level: 'info',
-      text: 'An all-coarse-semolina dough is slow to hydrate and can roll out gritty and tough with a pin. Expect the long end of the rest, and consider blending in some 00 if sheets tear or spring back (home-cook consensus, not tested here).',
+      text: m('warn.rolledAllCoarse'),
     });
   }
 
@@ -344,14 +345,14 @@ export function calculate(raw: CalcInput): CalcResult {
     warnings.push({
       id: 'yolk-fat',
       level: 'info',
-      text: 'Only the water in yolks is counted (~52 %). How yolk fat and solids shift the right hydration is uncalibrated: one manufacturer\'s yolk-only extruder recipe (Sirman tajarin) runs at ~35 % water, above this band. Let the squeeze test decide.',
+      text: m('warn.yolkFat'),
     });
   }
 
   if (input.mode === 'extruded' || rolled) {
     const totalWaterG = eggWater + input.addedWaterG;
     if (totalWaterG <= 0) {
-      return emptyResult(input, 'empty', 'Enter an egg weight or some added water.');
+      return emptyResult(input, 'empty', m('msg.noEgg'));
     }
     // Egg dough uses the brief's model; water-only dough uses a placeholder.
     // A personal calibration from the batch log replaces either.
@@ -373,7 +374,7 @@ export function calculate(raw: CalcInput): CalcResult {
       warnings.push({
         id: 'roller-extruded',
         level: 'warn',
-        text: 'A roller is not for extruded dough. This hydration is far too dry to roll — use an extruder, or wait for the softer rolled-pasta mode.',
+        text: m('warn.rollerExtruded'),
       });
     }
 
@@ -407,11 +408,7 @@ export function calculate(raw: CalcInput): CalcResult {
 
   // ---- Asian alkaline noodles: reference recipe scaled from the egg ----
   if (allEggG <= 0) {
-    return emptyResult(
-      input,
-      'empty',
-      'The alkaline recipe scales from the egg weight. Enter an egg weight or count.',
-    );
+    return emptyResult(input, 'empty', m('msg.alkalineNeedsEgg'));
   }
   const flourTotalG = allEggG / ALKALINE.eggFraction;
   const suggestedAddedWaterG: [number, number] = [
@@ -437,34 +434,35 @@ export function calculate(raw: CalcInput): CalcResult {
   if (lyeUnvalidated) uncalibrated.push('LYE_WATER_CARBONATE_FRACTION');
 
   const ingredients: IngredientRow[] = [
-    { label: 'Flour (total)', grams: flourTotalG, pct: 100 },
+    { label: m('ing.flour'), grams: flourTotalG, pct: 100 },
     ...FLOUR_KEYS.filter((k) => input.blend[k] > 0).map((k) => ({
-      label: `  ${FLOUR_LABELS[k]}`,
+      label: FLOUR_LABELS[k],
+      indent: true,
       grams: (flourTotalG * input.blend[k]) / 100,
       pct: input.blend[k],
     })),
-    { label: 'Egg (shelled)', grams: allEggG, pct: ALKALINE.eggFraction * 100 },
+    { label: m('ing.egg'), grams: allEggG, pct: ALKALINE.eggFraction * 100 },
     {
-      label: 'Added water',
+      label: m('ing.water'),
       grams: addedWaterG,
       pct: (addedWaterG / flourTotalG) * 100,
-      note: userWater ? 'your amount' : cal ? 'your calibrated target' : 'start at the low end (10–17 %)',
+      note: userWater ? m('ing.note.own') : cal ? m('ing.note.cal') : m('ing.note.low'),
     },
-    { label: 'Salt', grams: saltG, pct: ALKALINE.saltFraction * 100 },
+    { label: m('ing.salt'), grams: saltG, pct: ALKALINE.saltFraction * 100 },
   ];
   if (lyeUnvalidated) {
     ingredients.push({
-      label: 'Lye water (kansui)',
+      label: m('ing.lye'),
       grams: input.lyeWaterG,
       pct: (input.lyeWaterG / flourTotalG) * 100,
-      note: `≈ ${round(lyeAlkaliPct!, 2)} % alkali — unvalidated`,
+      note: m('ing.note.lye', { v: round(lyeAlkaliPct!, 2) }),
     });
   } else {
     ingredients.push({
-      label: 'Baked baking soda (sodium carbonate)',
+      label: m('ing.soda'),
       grams: sodaG,
       pct: ALKALINE.sodaFraction * 100,
-      note: `= ${round(sodaG / BAKING_SODA_TO_CARBONATE, 1)} g baking soda before baking`,
+      note: m('ing.note.soda', { g: round(sodaG / BAKING_SODA_TO_CARBONATE, 1) }),
     });
   }
 
@@ -472,7 +470,11 @@ export function calculate(raw: CalcInput): CalcResult {
     warnings.push({
       id: 'lye-unvalidated',
       level: 'warn',
-      text: `Do not swap lye water and baked soda spoon for spoon in either direction. A common kitchen substitute is 1 tsp lye water ≈ ¼ tsp baked soda dissolved in 1 tsp water, so dry baked soda carries roughly 4× the alkali per spoon. Bottle strength varies by brand. Your ${round(input.lyeWaterG, 1)} g is estimated at ≈ ${round(lyeAlkaliPct!, 2)} % alkali by flour weight (reference recipe: ${ALKALINE.sodaFraction * 100} %). This conversion is unvalidated.`,
+      text: m('warn.lye', {
+        g: round(input.lyeWaterG, 1),
+        a: round(lyeAlkaliPct!, 2),
+        ref: ALKALINE.sodaFraction * 100,
+      }),
     });
   }
 
@@ -480,11 +482,17 @@ export function calculate(raw: CalcInput): CalcResult {
   if (input.machine !== 'roller' && !cal && hydration > EXTRUDED_HYDRATION.max) {
     const toExtrudedG = Math.max(0, EXTRUDED_HYDRATION.target * flourTotalG - eggWater);
     const pub = ALKALINE_PUBLISHED_HYDRATION;
-    const where = hydration > pub.max ? 'above' : 'inside';
     warnings.push({
       id: 'alkaline-wet-for-press',
       level: 'info',
-      text: `Published alkaline-noodle studies run ${round(pub.min * 100)}–${round(pub.max * 100)} % total water (Hatcher 1999; Edwards 1996, rolled noodles), and kansui tends to raise water absorption. This recipe is at ${round(hydration * 100, 1)} %, ${where} that range and above the ${round(EXTRUDED_HYDRATION.min * 100, 1)}–${round(EXTRUDED_HYDRATION.max * 100, 1)} % band used for pressed pasta. Reaching 30 % would mean only ≈ ${round(toExtrudedG)} g added water. What a press needs with alkali is uncalibrated: add the water gradually, let the squeeze test decide, and rate your batches so the app can learn your own target.`,
+      text: m(hydration > pub.max ? 'warn.alkalineWet.above' : 'warn.alkalineWet.inside', {
+        lo: round(pub.min * 100),
+        hi: round(pub.max * 100),
+        h: round(hydration * 100, 1),
+        elo: round(EXTRUDED_HYDRATION.min * 100, 1),
+        ehi: round(EXTRUDED_HYDRATION.max * 100, 1),
+        g: round(toExtrudedG),
+      }),
     });
   }
 
@@ -644,56 +652,48 @@ export function adjustSteps(flourG: number): { waterG: number; semolinaG: number
 export function squeezeAdvice(state: SqueezeState, flourG = 500, mode: Mode = 'extruded'): SqueezeAdvice {
   const [restLo, restHi] = POWDERY_RETEST_REST_MIN;
   const steps = adjustSteps(flourG);
+  const w = round(steps.waterG, 1);
+  const tsp = formatTsp(steps.waterG);
   if (mode === 'rolled') {
     // Knead test: kneaded for several minutes and rested ~5 min (semolina feels dry at first).
     switch (state) {
       case 'crumbly':
-        return {
-          state,
-          verdict: 'ready',
-          title: 'Smooth, firm, barely tacky',
-          action: 'Ready. Wrap it and rest, then roll.',
-        };
+        return { state, verdict: 'ready', title: m('adv.rolled.ready.title'), action: m('adv.rolled.ready.action') };
       case 'powdery':
         return {
           state,
           verdict: 'add-water',
-          title: "Dry and shaggy, won't come together",
-          action: `Rest it ${restLo} minutes first (semolina feels dry until it hydrates). If still shaggy, knead in water ${round(steps.waterG, 1)} g (≈ ${formatTsp(steps.waterG)}) at a time.`,
+          title: m('adv.rolled.powdery.title'),
+          action: m('adv.rolled.powdery.action', { rest: restLo, w, tsp }),
           waterStepG: steps.waterG,
         };
       case 'sticky':
         return {
           state,
           verdict: 'add-semolina',
-          title: 'Sticky: clings to hands and board',
-          action: `Too wet to roll. Knead in flour ${steps.semolinaG} g at a time, dusting with semolina.`,
+          title: m('adv.rolled.sticky.title'),
+          action: m('adv.rolled.sticky.action', { s: steps.semolinaG }),
           semolinaStepG: steps.semolinaG,
         };
     }
   }
   switch (state) {
     case 'crumbly':
-      return {
-        state,
-        verdict: 'ready',
-        title: 'Slightly crumbly, clumps in hand',
-        action: 'Ready. Load the press.',
-      };
+      return { state, verdict: 'ready', title: m('adv.ext.ready.title'), action: m('adv.ext.ready.action') };
     case 'powdery':
       return {
         state,
         verdict: 'add-water',
-        title: "Dry and powdery, won't clump",
-        action: `Add water ${round(steps.waterG, 1)} g (≈ ${formatTsp(steps.waterG)}) at a time, mix, rest ${restLo}–${restHi} min, retest.`,
+        title: m('adv.ext.powdery.title'),
+        action: m('adv.ext.powdery.action', { w, tsp, lo: restLo, hi: restHi }),
         waterStepG: steps.waterG,
       };
     case 'sticky':
       return {
         state,
         verdict: 'add-semolina',
-        title: 'Smooth sticky ball',
-        action: `Too wet for extrusion. Add semolina ${steps.semolinaG} g at a time.`,
+        title: m('adv.ext.sticky.title'),
+        action: m('adv.ext.sticky.action', { s: steps.semolinaG }),
         semolinaStepG: steps.semolinaG,
       };
   }
@@ -737,21 +737,31 @@ export function deltaVsPrevious(batch: Batch, all: Batch[]): BatchDelta | null {
 
 /** e.g. "You added 8 g extra water (last time: 0 g) and rated this batch 4/5 vs 2/5 last time. ..." */
 export function describeDelta(d: BatchDelta, unit: Unit): string {
-  const water = `You added ${formatAmount(d.extraWaterG, unit)} extra water (last time: ${formatAmount(d.prevExtraWaterG, unit)})`;
+  const water = t('delta.water', { now: formatAmount(d.extraWaterG, unit), prev: formatAmount(d.prevExtraWaterG, unit) });
   let rating: string;
   if (d.rating != null && d.prevRating != null) {
-    rating = `rated this batch ${d.rating}/5 vs ${d.prevRating}/5 last time`;
+    rating = t('delta.rating.both', { a: d.rating, b: d.prevRating });
   } else if (d.rating != null) {
-    rating = `rated this batch ${d.rating}/5 (last batch was not rated)`;
+    rating = t('delta.rating.prevNone', { a: d.rating });
   } else {
-    rating = 'have not rated this batch yet';
+    rating = t('delta.rating.none');
   }
-  let out = `${water} and ${rating}.`;
+  const out = [t('delta.join', { water, rating })];
   if (d.extraSemolinaG > 0 || d.prevExtraSemolinaG > 0) {
-    out += ` Extra semolina: ${formatAmount(d.extraSemolinaG, unit)} (last time: ${formatAmount(d.prevExtraSemolinaG, unit)}).`;
+    out.push(
+      t('delta.semolina', {
+        now: formatAmount(d.extraSemolinaG, unit),
+        prev: formatAmount(d.prevExtraSemolinaG, unit),
+      }),
+    );
   }
-  out += ` Hydration reached: ${round(d.achievedHydration * 100, 1)} % (last time: ${round(d.prevAchievedHydration * 100, 1)} %).`;
-  return out;
+  out.push(
+    t('delta.hydration', {
+      a: t('fmt.pct', { v: round(d.achievedHydration * 100, 1) }),
+      b: t('fmt.pct', { v: round(d.prevAchievedHydration * 100, 1) }),
+    }),
+  );
+  return out.join(' ');
 }
 
 /**

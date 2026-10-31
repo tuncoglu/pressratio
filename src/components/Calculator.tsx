@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
   FLOUR_KEYS,
-  FLOUR_LABELS,
   blendStats,
   calculate,
   calibrationFor,
@@ -12,9 +11,11 @@ import {
   sheetFor,
   eggFromShelledG,
   eggToShelledG,
+  flourName,
   formatAmount,
   round,
 } from '../calc/calc';
+import { n, pct, t, tp, tx } from '../i18n';
 import { EGG_SIZES, IN_SHELL_YIELD, type EggSize } from '../calc/constants';
 import type { Batch, EggError, EggKind, FlourKey, Mode, SqueezeState, Unit } from '../calc/types';
 import {
@@ -180,7 +181,7 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
       createdAt: new Date().toISOString(),
       mode: form.mode,
       machine: form.machine,
-      die: rolled ? `${shape.short} ${shape.thicknessMm} mm` : form.die,
+      die: rolled ? `${tx(shape.short)} ${n(shape.thicknessMm)} mm` : form.die,
       blend: form.blend,
       eggShelledG: r.eggShelledG,
       yolkG: r.yolkG,
@@ -207,7 +208,7 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
     <div className="stack">
       {/* ---- Mode ---- */}
       <fieldset className="card">
-        <legend>Mode</legend>
+        <legend>{t('mode.legend')}</legend>
         <div className="radio-list">
           {MODE_OPTIONS.map((m) => (
             <label key={m.id} className={`radio${m.disabled ? ' disabled' : ''}${form.mode === m.id ? ' checked' : ''}`}>
@@ -218,7 +219,7 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
                 disabled={m.disabled}
                 onChange={() => patch(withDieFor(withMode(m.id as Mode)))}
               />
-              {m.label}
+              {tx(m.label)}
             </label>
           ))}
         </div>
@@ -226,30 +227,36 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
 
       {/* ---- Liquid ---- */}
       <fieldset className="card">
-        <legend>Liquid</legend>
+        <legend>{t('calc.liquid')}</legend>
         <div className="field">
-          <label htmlFor="egg-kind">Egg entered as</label>
+          <label htmlFor="egg-kind">{t('egg.kind')}</label>
           <select id="egg-kind" value={form.eggKind} onChange={(e) => changeEggKind(e.target.value as EggKind)}>
-            <option value="shelled">Shelled weight (g)</option>
-            <option value="count">Number of eggs</option>
-            <option value="inShell">In-shell weight (g)</option>
+            <option value="shelled">{t('egg.kind.shelled')}</option>
+            <option value="count">{t('egg.kind.count')}</option>
+            <option value="inShell">{t('egg.kind.inShell')}</option>
           </select>
         </div>
         <NumField
           id="egg-value"
-          label={form.eggKind === 'count' ? 'Eggs' : form.eggKind === 'inShell' ? `Egg, in shell (${unit})` : `Egg, shelled (${unit})`}
+          label={
+            form.eggKind === 'count'
+              ? t('egg.label.count')
+              : form.eggKind === 'inShell'
+                ? t('egg.label.inShell', { unit })
+                : t('egg.label.shelled', { unit })
+          }
           value={form.eggValue}
           unit={form.eggKind === 'count' ? undefined : unit}
           onChange={(v) => patch({ eggValue: v ?? 0 })}
-          suffix={form.eggKind === 'count' ? 'eggs' : unit}
+          suffix={form.eggKind === 'count' ? t('egg.suffix.count') : unit}
         />
         {form.eggKind === 'count' && (
           <div className="field">
-            <label htmlFor="egg-size">Egg size</label>
+            <label htmlFor="egg-size">{t('egg.size')}</label>
             <select id="egg-size" value={form.eggSize} onChange={(e) => changeEggSize(e.target.value as EggSize)}>
               {Object.entries(EGG_SIZES).map(([id, sz]) => (
                 <option key={id} value={id}>
-                  {sz.label} ≈ {sz.shelledG} g shelled
+                  {t('egg.sizeOption', { label: tx(sz.label), g: sz.shelledG })}
                 </option>
               ))}
             </select>
@@ -259,24 +266,32 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
           <div className="converted">
             <p>
               {form.eggKind === 'inShell'
-                ? `${formatAmount(form.eggValue, unit)} in shell → ${formatAmount(shelledG, unit)} shelled (× ${IN_SHELL_YIELD.toFixed(2)})`
-                : `${form.eggValue} egg${form.eggValue === 1 ? '' : 's'} → ${formatAmount(shelledG, unit)} shelled (assumes ${EGG_SIZES[form.eggSize].shelledG} g per ${EGG_SIZES[form.eggSize].label} egg)`}
+                ? t('egg.conv.inShell', {
+                    a: formatAmount(form.eggValue, unit),
+                    b: formatAmount(shelledG, unit),
+                    y: n(Number(IN_SHELL_YIELD.toFixed(2))),
+                  })
+                : tp('egg.conv.count', form.eggValue, {
+                    b: formatAmount(shelledG, unit),
+                    g: EGG_SIZES[form.eggSize].shelledG,
+                    label: tx(EGG_SIZES[form.eggSize].label),
+                  })}
             </p>
             <button type="button" className="btn btn-small" onClick={weighInstead}>
-              I weighed them (shelled)
+              {t('egg.weighInstead')}
             </button>
           </div>
         )}
         <NumField
-          label={`Extra yolks (${unit}) — optional`}
+          label={t('calc.yolks', { unit })}
           value={form.yolkG}
           unit={unit}
           suffix={unit}
           onChange={(v) => patch({ yolkG: v ?? 0 })}
-          hint="Yolks are ~52 % water vs ~75 % for whole egg, so they count for less."
+          hint={t('calc.yolks.hint')}
         />
         <NumField
-          label={`Added water (${unit}) — optional`}
+          label={t('calc.water', { unit })}
           value={form.addedWaterG}
           unit={unit}
           suffix={unit}
@@ -284,30 +299,32 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
           hint={
             alkaline
               ? cal && form.useCalibration
-                ? 'Leave empty to use your calibrated target.'
-                : 'Leave empty to start at the low end (10 % of flour).'
+                ? t('calc.water.hint.cal')
+                : t('calc.water.hint.low')
               : undefined
           }
         />
         {alkaline && (
           <>
             <NumField
-              label={`Lye water (kansui) (${unit}) — optional`}
+              label={t('calc.lye', { unit })}
               value={form.lyeWaterG}
               unit={unit}
               suffix={unit}
               onChange={(v) => patch({ lyeWaterG: v ?? 0 })}
             />
             <div className="note note-danger">
-              <strong>Lye water safety</strong>
-              <p>{LYE_NOTE}</p>
+              <strong>{t('calc.lye.title')}</strong>
+              <p>{tx(LYE_NOTE)}</p>
               <p>
-                Entering lye water replaces the baked baking soda. The conversion is <Unvalidated />.
+                {t('calc.lye.replaces').split('{badge}')[0]}
+                <Unvalidated />
+                {t('calc.lye.replaces').split('{badge}')[1]}
               </p>
             </div>
             <div className="note note-warn">
-              <strong>Baked soda &amp; alkaline dough</strong>
-              <p>{ALKALI_HANDLING_NOTE}</p>
+              <strong>{t('calc.soda.title')}</strong>
+              <p>{tx(ALKALI_HANDLING_NOTE)}</p>
             </div>
           </>
         )}
@@ -317,19 +334,19 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
 
       {/* ---- Which flours ---- */}
       <fieldset className="card">
-        <legend>Your flours</legend>
+        <legend>{t('flour.yours')}</legend>
         {FLOUR_KEYS.filter((k) => form.blend[k] > 0).map((k) => {
           const f = specs[k];
           const facts = [
-            f?.protein != null ? `${f.protein} % protein` : '',
+            f?.protein != null ? t('flour.protein', { v: f.protein }) : '',
             f?.w != null ? `W ${f.w}` : '',
-            f?.pl != null ? `P/L ${f.pl}` : '',
-            f?.ash ? `ash ${f.ash}` : '',
+            f?.pl != null ? `P/L ${n(f.pl)}` : '',
+            f?.ash ? t('flour.ash', { v: f.ash }) : '',
           ].filter(Boolean);
           return (
             <div className="field" key={k}>
               <label htmlFor={`flour-${k}`}>
-                {FLOUR_LABELS[k]} ({form.blend[k]} %)
+                {flourName(k)} ({pct(form.blend[k])})
               </label>
               <select
                 id={`flour-${k}`}
@@ -338,7 +355,7 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
               >
                 {floursFor(k).map((o) => (
                   <option key={o.id} value={o.id}>
-                    {o.label}
+                    {tx(o.label)}
                   </option>
                 ))}
               </select>
@@ -346,7 +363,7 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
                 <p className="hint">
                   {facts.join(' · ')}
                   {facts.length > 0 && f?.note ? ' — ' : ''}
-                  {f?.note}
+                  {f?.note && tx(f.note)}
                 </p>
               )}
             </div>
@@ -354,26 +371,22 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
         })}
         {stats.protein != null && (
           <p className="hint">
-            Blend: {round(stats.protein, 1)} % protein
-            {stats.proteinCoverage < 0.999 && ` (${round(stats.proteinCoverage * 100)} % of the blend has data)`}
-            {stats.w != null && `, W ≈ ${round(stats.w)} (${round(stats.wCoverage * 100)} % of the blend)`}.
+            {t('flour.blendProtein', { v: round(stats.protein, 1) })}
+            {stats.proteinCoverage < 0.999 && t('flour.blendCoverage', { v: round(stats.proteinCoverage * 100) })}
+            {stats.w != null && t('flour.blendW', { w: round(stats.w), c: round(stats.wCoverage * 100) })}.
           </p>
         )}
         {isStrongBlend(stats.protein) && (
-          <div className="note">
-            Strong blend. High-protein flours absorb more water and form a tougher, more elastic dough, so expect to land
-            nearer the wet end of the band and to need more force on a manual press. Your calibrated target will capture
-            this once you've rated a few batches.
-          </div>
+          <div className="note">{t('flour.strong')}</div>
         )}
       </fieldset>
 
       {/* ---- Rolling (rolled mode) ---- */}
       {rolled && (
         <fieldset className="card">
-          <legend>Rolling</legend>
+          <legend>{t('calc.rolling')}</legend>
           <div className="field">
-            <label htmlFor="roll-tool">Rolling with</label>
+            <label htmlFor="roll-tool">{t('calc.rollTool')}</label>
             <select
               id="roll-tool"
               value={form.machine}
@@ -381,14 +394,14 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
             >
               {(['pin', 'roller'] as const).map((id) => (
                 <option key={id} value={id}>
-                  {MACHINES[id].label}
+                  {tx(MACHINES[id].label)}
                 </option>
               ))}
             </select>
-            <p className="hint">{MACHINES[form.machine].note}</p>
+            <p className="hint">{tx(MACHINES[form.machine].note)}</p>
           </div>
           <div className="field">
-            <label htmlFor="roll-shape">Shape</label>
+            <label htmlFor="roll-shape">{t('calc.shape')}</label>
             <select
               id="roll-shape"
               value={form.rollShape}
@@ -396,14 +409,14 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
             >
               {Object.entries(ROLL_SHAPES).map(([id, s]) => (
                 <option key={id} value={id}>
-                  {s.label}
+                  {tx(s.label)}
                 </option>
               ))}
             </select>
             <p className="hint">
-              Roll to about {shape.thicknessMm} mm (range {shape.rangeMm[0]}–{shape.rangeMm[1]} mm). {shape.note}
+              {t('shape.thickness', { t: shape.thicknessMm, lo: shape.rangeMm[0], hi: shape.rangeMm[1] })} {tx(shape.note)}
             </p>
-            {shape.cuts && <p className="hint">Cut widths: {shape.cuts.join(' · ')}.</p>}
+            {shape.cuts && <p className="hint">{t('shape.cuts', { list: shape.cuts.join(' · ') })}</p>}
           </div>
           <AmbientField form={form} patch={patch} />
         </fieldset>
@@ -416,9 +429,9 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
       {/* ---- Machine ---- */}
       {!rolled && (
       <fieldset className="card">
-        <legend>Machine</legend>
+        <legend>{t('calc.machine')}</legend>
         <div className="field">
-          <label htmlFor="machine">Machine</label>
+          <label htmlFor="machine">{t('calc.machine')}</label>
           <select
             id="machine"
             value={form.machine}
@@ -428,24 +441,24 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
               .filter(([id]) => id !== 'pin')
               .map(([id, m]) => (
                 <option key={id} value={id}>
-                  {m.label}
+                  {tx(m.label)}
                 </option>
               ))}
           </select>
-          <p className="hint">{MACHINES[form.machine].note}</p>
+          <p className="hint">{tx(MACHINES[form.machine].note)}</p>
         </div>
         {form.machine === 'manual' && (
           <div className="field">
-            <label htmlFor="press-model">Bigolaro model</label>
+            <label htmlFor="press-model">{t('calc.pressModel')}</label>
             <select
               id="press-model"
               value={form.pressModel ?? ''}
               onChange={(e) => patch(withDieFor({ pressModel: (e.target.value || null) as BigolaroModel | null }))}
             >
-              <option value="">Not set</option>
+              <option value="">{t('calc.notSet')}</option>
               {Object.entries(BIGOLARO_MODELS).map(([id, m]) => (
                 <option key={id} value={id}>
-                  {m.label}: {m.capacityG} g dough per load
+                  {t('calc.modelOption', { label: m.label, g: m.capacityG })}
                 </option>
               ))}
             </select>
@@ -453,13 +466,13 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
         )}
         {form.machine === 'electric' && (
           <div className="field">
-            <label htmlFor="electric-model">Model</label>
+            <label htmlFor="electric-model">{t('calc.electricModel')}</label>
             <select
               id="electric-model"
               value={form.electricModel ?? ''}
               onChange={(e) => patch(withDieFor({ electricModel: (e.target.value || null) as ElectricModel | null }))}
             >
-              <option value="">Any model (show all dies)</option>
+              <option value="">{t('calc.anyModel')}</option>
               {Object.entries(ELECTRIC_MODELS).map(([id, label]) => (
                 <option key={id} value={id}>
                   {label}
@@ -469,7 +482,7 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
           </div>
         )}
         <div className="field">
-          <label htmlFor="die">Die</label>
+          <label htmlFor="die">{t('calc.die')}</label>
           <select
             id="die"
             value={dieValue}
@@ -480,31 +493,28 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
               if (d) patch({ dieCustom: false, dieId: d.id, die: dieName(d) });
             }}
           >
-            {dieValue === '' && <option value="">Choose a die…</option>}
+            {dieValue === '' && <option value="">{t('calc.chooseDie')}</option>}
             {dieOptions.map((d) => (
               <option key={d.id} value={d.id}>
                 {dieLabel(d)}
               </option>
             ))}
-            <option value="__custom">Custom…</option>
+            <option value="__custom">{t('calc.customDie')}</option>
           </select>
-          {selectedDie?.sizeNote && <p className="hint">{selectedDie.sizeNote}.</p>}
+          {selectedDie?.sizeNote && <p className="hint">{tx(selectedDie.sizeNote)}.</p>}
           {form.machine === 'manual' && selectedDie?.force === 'high' && (
-            <p className="hint">
-              Thin die: these need the most force on a Bigolaro. Drier dough sharply raises extrusion pressure, so aim
-              for the wetter half of the band: crumbs that clump readily but still don't form a smooth ball.
-            </p>
+            <p className="hint">{t('die.thin')}</p>
           )}
           {form.machine === 'manual' && selectedDie?.force === 'low' && (
-            <p className="hint">Large shape: among the easiest to press.</p>
+            <p className="hint">{t('die.large')}</p>
           )}
-          {selectedDie?.ptfe && <p className="hint">PTFE die: smoother, glossier pasta than bronze.</p>}
+          {selectedDie?.ptfe && <p className="hint">{t('die.ptfe')}</p>}
           {form.dieCustom && (
             <input
-              aria-label="Custom die name"
+              aria-label={t('calc.customDieName')}
               type="text"
               value={form.die}
-              placeholder="e.g. fusilli"
+              placeholder={t('calc.dieExample')}
               onChange={(e) => patch({ die: e.target.value })}
             />
           )}
@@ -515,10 +525,10 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
 
       {rolled && (
         <div className="note">
-          <strong>Before you roll</strong>
+          <strong>{t('roll.tipsTitle')}</strong>
           <ul>
-            {ROLL_TIPS.map((t) => (
-              <li key={t}>{t}</li>
+            {ROLL_TIPS.map((tip) => (
+              <li key={tip.k}>{tx(tip)}</li>
             ))}
           </ul>
         </div>
@@ -526,10 +536,10 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
 
       {!rolled && form.machine !== 'roller' && (
         <div className="note">
-          <strong>Before you press</strong>
+          <strong>{t('press.tipsTitle')}</strong>
           <ul>
-            {PRESS_TIPS.map((t) => (
-              <li key={t}>{t}</li>
+            {PRESS_TIPS.map((tip) => (
+              <li key={tip.k}>{tx(tip)}</li>
             ))}
           </ul>
         </div>
@@ -537,8 +547,8 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
 
       {(form.mode === 'extruded' || (alkaline && form.machine !== 'roller')) && (
         <div className="note note-care">
-          <strong>Care note</strong>
-          <p>{CARE_NOTE}</p>
+          <strong>{t('care.title')}</strong>
+          <p>{tx(CARE_NOTE)}</p>
         </div>
       )}
 
@@ -550,11 +560,9 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
             onChange={(e) => patch({ useCalibration: e.target.checked })}
           />
           <span>
-            Use my calibrated target: {round(cal.target * 100, 1)} % hydration
+            {t('cal.use', { v: pct(round(cal.target * 100, 1)) })}
             <span className="hint" style={{ display: 'block', fontWeight: 400 }}>
-              Median of {cal.n} {alkaline ? 'alkaline ' : rolled ? 'rolled ' : ''}batches rated 4+ with this{' '}
-              {rolled ? 'tool' : 'machine'}, liquid and a similar flour blend.{' '}
-              {alkaline ? 'It sets the added water.' : rolled ? 'Default is 37.5 %.' : 'Default is 30 %.'}
+              {t(alkaline ? 'cal.detail.alkaline' : rolled ? 'cal.detail.rolled' : 'cal.detail.extruded', { n: cal.n })}
             </span>
           </span>
         </label>
@@ -562,45 +570,48 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
 
       {/* ---- Results ---- */}
       <section className="card results" aria-live="polite">
-        <h2>Result</h2>
+        <h2>{t('res.title')}</h2>
         {r.status !== 'ok' ? (
-          <p className="muted">{r.message}</p>
+          <p className="muted">{r.message && tx(r.message)}</p>
         ) : (
           <>
             {r.warnings.map((w) => (
               <div key={w.id} className={`note ${w.level === 'warn' ? 'note-danger' : ''}`} role="alert">
-                {w.text}
+                {tx(w.text)}
               </div>
             ))}
 
             <div className="big">
               <span className="big-num">{formatAmount(r.flourTotalG, unit)}</span>
-              <span className="big-label">total flour</span>
+              <span className="big-label">{t('res.totalFlour')}</span>
               {!alkaline && (
                 <span className="range">
-                  range {formatAmount(r.flourRangeG[0], unit)} – {formatAmount(r.flourRangeG[1], unit)}
+                  {t('res.range', { a: formatAmount(r.flourRangeG[0], unit), b: formatAmount(r.flourRangeG[1], unit) })}
                 </span>
               )}
             </div>
             {r.eggError && <EggPrecision err={r.eggError} unit={unit} onWeigh={weighInstead} />}
 
-            {rolled && <SheetInfo doughG={dough} thicknessMm={shape.thicknessMm} unit={unit} shapeLabel={shape.short} />}
+            {rolled && <SheetInfo doughG={dough} thicknessMm={shape.thicknessMm} unit={unit} shapeLabel={tx(shape.shortLc)} />}
 
             {press && loads && (
               <div className="precision precision-loads">
                 <p>
-                  <strong>
-                    {formatAmount(dough, unit)} dough = {round(loads.loads, 2)} load{loads.loads === 1 ? '' : 's'}
-                  </strong>{' '}
-                  of your {press.label} ({formatAmount(press.capacityG, unit)} per load).
-                  {loads.fullLoads > 1 && Math.abs(loads.loads - Math.round(loads.loads)) > 0.05 &&
-                    ' The last load will be partly full.'}
+                  {tp('res.loads', loads.loads, {
+                    dough: formatAmount(dough, unit),
+                    loads: round(loads.loads, 2),
+                    press: press.label,
+                    cap: formatAmount(press.capacityG, unit),
+                  })}
+                  {loads.fullLoads > 1 &&
+                    Math.abs(loads.loads - Math.round(loads.loads)) > 0.05 &&
+                    ` ${t('res.lastPartly')}`}
                 </p>
                 <div className="row">
                   {[...new Set([Math.max(1, Math.floor(loads.loads)), Math.max(1, Math.ceil(loads.loads))])].map(
-                    (n) => (
-                      <button key={n} type="button" className="btn btn-small" onClick={() => fillLoads(n)}>
-                        Scale to {n} full load{n === 1 ? '' : 's'}
+                    (k) => (
+                      <button key={k} type="button" className="btn btn-small" onClick={() => fillLoads(k)}>
+                        {tp('res.scaleTo', k)}
                       </button>
                     ),
                   )}
@@ -612,84 +623,88 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
               {FLOUR_KEYS.filter((k) => form.blend[k] > 0).map((k) => (
                 <div key={k}>
                   <dt>
-                    {specs[k]?.product ? specs[k]!.label : FLOUR_LABELS[k]} ({form.blend[k]} %)
+                    {specs[k]?.product ? tx(specs[k]!.label) : flourName(k)} ({pct(form.blend[k])})
                   </dt>
                   <dd>{formatAmount(r.flourBreakdownG[k], unit)}</dd>
                 </div>
               ))}
               <div>
-                <dt>Total liquid</dt>
+                <dt>{t('res.totalLiquid')}</dt>
                 <dd>{formatAmount(r.totalLiquidG, unit)}</dd>
               </div>
               <div>
                 <dt>
-                  Hydration (water ÷ flour){r.calibration && <> <span className="badge badge-ok">your target</span></>}
+                  {t('res.hydration')}
+                  {r.calibration && (
+                    <>
+                      {' '}
+                      <span className="badge badge-ok">{t('res.yourTarget')}</span>
+                    </>
+                  )}
                   {r.uncalibrated.includes('WATER_ONLY_HYDRATION') && <> <Uncalibrated id="WATER_ONLY_HYDRATION" /></>}
                   {r.uncalibrated.includes('ROLLED_HYDRATION') && <> <Uncalibrated id="ROLLED_HYDRATION" /></>}
                 </dt>
                 <dd>
-                  {round(r.hydration * 100, 1)} %
+                  {pct(round(r.hydration * 100, 1))}
                   {!alkaline && (
                     <span className="range">
                       {' '}
-                      ({round(r.hydrationRange[0] * 100, 1)}–{round(r.hydrationRange[1] * 100, 1)} %)
+                      ({n(round(r.hydrationRange[0] * 100, 1))}–{pct(round(r.hydrationRange[1] * 100, 1))})
                     </span>
                   )}
                 </dd>
               </div>
             </dl>
 
-            <h3>Texture target</h3>
-            <p className="texture">{r.textureTarget}</p>
+            <h3>{t('res.texture')}</h3>
+            <p className="texture">{r.textureTarget && tx(r.textureTarget)}</p>
 
-            <p className="hint">
-              Water you add (egg water included) ÷ flour as weighed. The flour's own 10–15 % moisture isn't counted, and
-              it varies with storage, so the squeeze test has the final say.
-            </p>
+            <p className="hint">{t('res.hydrationNote')}</p>
 
             <h3>
-              Rest{r.uncalibrated.includes('ROLLED_REST') && <> <Uncalibrated id="ROLLED_REST" /></>}
+              {t('res.rest')}
+              {r.uncalibrated.includes('ROLLED_REST') && <> <Uncalibrated id="ROLLED_REST" /></>}
             </h3>
             <p className="rest">
-              <strong>
-                {r.rest.minMin}–{r.rest.maxMin} min
-              </strong>{' '}
-              covered, at room temperature ({round(r.rest.coarseShare * 100)} % coarse semolina)
+              <strong>{t('res.restTime', { a: r.rest.minMin, b: r.rest.maxMin })}</strong>{' '}
+              {t('res.restLine', { v: round(r.rest.coarseShare * 100) })}
             </p>
             <ul className="plain">
-              {r.rest.notes.map((n) => (
-                <li key={n}>{n}</li>
+              {r.rest.notes.map((note) => (
+                <li key={note.k}>{tx(note)}</li>
               ))}
             </ul>
 
             {alkaline && (
               <>
-                <h3>Baker's percentages</h3>
+                <h3>{t('res.bakers')}</h3>
                 <table className="bakers">
                   <thead>
                     <tr>
-                      <th>Ingredient</th>
-                      <th>Amount</th>
-                      <th>% flour</th>
+                      <th>{t('res.th.ingredient')}</th>
+                      <th>{t('res.th.amount')}</th>
+                      <th>{t('res.th.pct')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {r.ingredients.map((i) => (
-                      <tr key={i.label}>
-                        <td className={i.label.startsWith('  ') ? 'indent' : undefined}>
-                          {i.label.trim()}
-                          {i.note && <small className="cell-note">{i.note}</small>}
+                      <tr key={i.label.k}>
+                        <td className={i.indent ? 'indent' : undefined}>
+                          {tx(i.label)}
+                          {i.note && <small className="cell-note">{tx(i.note)}</small>}
                         </td>
                         <td>{formatAmount(i.grams, unit)}</td>
-                        <td>{round(i.pct, 1)}</td>
+                        <td>{n(round(i.pct, 1))}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
                 {r.suggestedAddedWaterG && !r.calibration && (
                   <p className="hint">
-                    Added water range: {formatAmount(r.suggestedAddedWaterG[0], unit)}–
-                    {formatAmount(r.suggestedAddedWaterG[1], unit)} (10–17 % of flour). Start low.
+                    {t('res.waterRange', {
+                      a: formatAmount(r.suggestedAddedWaterG[0], unit),
+                      b: formatAmount(r.suggestedAddedWaterG[1], unit),
+                    })}
                   </p>
                 )}
               </>
@@ -702,7 +717,7 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
 
       {/* ---- Adjust / squeeze test ---- */}
       <details className="card adjust">
-        <summary>{rolled ? 'Adjust — knead test' : 'Adjust — squeeze test'}</summary>
+        <summary>{rolled ? t('adj.knead') : t('adj.squeeze')}</summary>
         <SqueezeTest
           state={squeeze}
           onState={setSqueeze}
@@ -717,13 +732,13 @@ export function Calculator({ form, setForm, unit, batches, activeBatch, onStart,
       {/* ---- Start batch ---- */}
       <div className="start">
         <button type="button" className="btn btn-primary" disabled={r.status !== 'ok'} onClick={start}>
-          Start batch
+          {t('start.button')}
         </button>
         {started && (
           <p className="ok" role="status">
-            Batch started and logged.{' '}
+            {t('start.done')}{' '}
             <button type="button" className="link" onClick={onOpenLog}>
-              Open batch log
+              {t('start.open')}
             </button>
           </p>
         )}
@@ -750,29 +765,23 @@ function SheetInfo({
     <div className="precision precision-loads">
       <p>
         <strong>
-          {formatAmount(doughG, unit)} dough → about {round(s.sheets, 1)} sheets of {SHEET_REF_CM} × {SHEET_REF_CM} cm
+          {t('sheet.head', { dough: formatAmount(doughG, unit), sheets: round(s.sheets, 1), ref: SHEET_REF_CM })}
         </strong>{' '}
-        at {thicknessMm} mm ({shapeLabel.toLowerCase()}), about {round(s.areaCm2 / 100)} dm² in all. Roll it in portions
-        you can handle with your pin and keep the rest wrapped. <Uncalibrated id="DOUGH_DENSITY" />
+        {t('sheet.tail', { t: thicknessMm, shape: shapeLabel, dm: round(s.areaCm2 / 100) })}{' '}
+        <Uncalibrated id="DOUGH_DENSITY" />
       </p>
     </div>
   );
 }
 
-const EGG_SOURCE: Record<EggKind, string> = {
-  count: 'counted eggs',
-  inShell: 'in-shell weight',
-  shelled: 'weighed shelled eggs',
-};
-
 /** How much the flour figure depends on how the egg was measured. */
 function EggPrecision({ err, unit, onWeigh }: { err: EggError; unit: Unit; onWeigh: () => void }) {
-  const pct = (f: number) => `${f < 0.01 ? round(f * 100, 1) : round(f * 100)} %`;
+  const eggPct = (f: number) => pct(f < 0.01 ? round(f * 100, 1) : round(f * 100));
   if (err.kind === 'shelled') {
     return (
       <p className="precision precision-ok">
-        <strong>Egg weighed ✓</strong> — egg error ±{formatAmount(err.flourG, unit)} of flour ({pct(err.fraction)}, a 1 g
-        scale). The range above comes from the dough itself, not from your measuring.
+        <strong>{t('prec.okHead')}</strong>{' '}
+        {t('prec.okBody', { a: formatAmount(err.flourG, unit), p: eggPct(err.fraction) })}
       </p>
     );
   }
@@ -780,14 +789,15 @@ function EggPrecision({ err, unit, onWeigh }: { err: EggError; unit: Unit; onWei
     <div className="precision precision-warn">
       <p>
         <strong>
-          ±{formatAmount(err.flourG, unit)} of flour from {EGG_SOURCE[err.kind]}
+          {t(err.kind === 'count' ? 'prec.warnHead.count' : 'prec.warnHead.inShell', {
+            a: formatAmount(err.flourG, unit),
+          })}
         </strong>{' '}
-        (egg weight ±{pct(err.fraction)}), on top of the range above.
-        {err.kind === 'count' && ' Picking the wrong size class makes it worse.'} Weighing the shelled eggs cuts this to
-        about ±{formatAmount(err.weighedFlourG, unit)}.
+        {t('prec.warnBody', { p: eggPct(err.fraction) })}
+        {err.kind === 'count' && ` ${t('prec.warnSize')}`} {t('prec.warnCut', { a: formatAmount(err.weighedFlourG, unit) })}
       </p>
       <button type="button" className="btn btn-small" onClick={onWeigh}>
-        Weigh shelled eggs instead
+        {t('prec.weigh')}
       </button>
     </div>
   );

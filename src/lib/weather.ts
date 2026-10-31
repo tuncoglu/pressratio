@@ -4,6 +4,8 @@
 // the app makes, and only when the user asks for it (or turns on auto-detect).
 // Coordinates are rounded to 2 decimals (~1 km) before they leave the device.
 
+import { m, type Msg } from '../i18n';
+
 export const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast';
 export const GEO_TIMEOUT_MS = 10_000;
 export const FETCH_TIMEOUT_MS = 8_000;
@@ -32,19 +34,8 @@ export function parseTemp(json: unknown): number | null {
   return typeof t === 'number' && Number.isFinite(t) && t > -90 && t < 70 ? t : null;
 }
 
-export function failureMessage(reason: DetectFailure): string {
-  switch (reason) {
-    case 'unsupported':
-      return 'This browser cannot share a location. Enter the temperature yourself.';
-    case 'denied':
-      return 'Location permission was declined. Enter the temperature yourself.';
-    case 'unavailable':
-      return 'Your location is unavailable right now. Enter the temperature yourself.';
-    case 'timeout':
-      return 'Finding your location took too long. Enter the temperature yourself.';
-    case 'network':
-      return 'Could not reach the weather service (are you offline?). Enter the temperature yourself.';
-  }
+export function failureMessage(reason: DetectFailure): Msg {
+  return m(`amb.err.${reason}` as const);
 }
 
 function browserPosition(): Promise<Position> {

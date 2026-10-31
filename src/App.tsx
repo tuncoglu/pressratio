@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Batch, Unit } from './calc/types';
 import { BatchLog } from './components/BatchLog';
 import { Calculator } from './components/Calculator';
+import { LOCALES, isLocale, setLocale, t } from './i18n';
 import { loadState, saveState, type AppState, type FormState } from './storage';
 
 type Tab = 'calc' | 'log';
@@ -9,6 +10,12 @@ type Tab = 'calc' | 'log';
 export default function App() {
   const [state, setState] = useState<AppState>(loadState);
   const [tab, setTab] = useState<Tab>('calc');
+
+  // Set before the children render, so everything below reads the right language.
+  setLocale(state.locale);
+  useEffect(() => {
+    document.title = t('app.title');
+  }, [state.locale]);
 
   useEffect(() => saveState(state), [state]);
 
@@ -21,11 +28,11 @@ export default function App() {
     <div className="app">
       <header className="top">
         <div>
-          <h1>Pasta &amp; Noodle Dough Calculator</h1>
-          <p className="subtitle">Hand-press, extruder and noodle recipes</p>
-          <p className="tagline">Guidance, not guarantee.</p>
+          <h1>{t('app.title')}</h1>
+          <p className="subtitle">{t('app.subtitle')}</p>
+          <p className="tagline">{t('app.tagline')}</p>
         </div>
-        <div className="seg" role="radiogroup" aria-label="Units">
+        <div className="seg" role="radiogroup" aria-label={t('app.units')}>
           {(['g', 'oz'] as const).map((u) => (
             <button
               key={u}
@@ -35,7 +42,7 @@ export default function App() {
               className={state.unit === u ? 'on' : ''}
               onClick={() => setUnit(u)}
             >
-              {u === 'g' ? 'grams' : 'ounces'}
+              {u === 'g' ? t('unit.grams') : t('unit.ounces')}
             </button>
           ))}
         </div>
@@ -75,15 +82,28 @@ export default function App() {
       </main>
 
       <footer className="legal">
-        <a href="./privacy/">Privacy policy</a>
+        <label className="lang">
+          <span>{t('app.language')}</span>
+          <select
+            value={state.locale}
+            onChange={(e) => isLocale(e.target.value) && setState((s) => ({ ...s, locale: e.target.value as AppState['locale'] }))}
+          >
+            {LOCALES.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <a href="./privacy/">{t('legal.privacy')}</a>
       </footer>
 
-      <nav className="tabs" aria-label="Screens">
+      <nav className="tabs" aria-label={t('app.screens')}>
         <button type="button" className={tab === 'calc' ? 'on' : ''} aria-current={tab === 'calc'} onClick={() => setTab('calc')}>
-          Calculator
+          {t('tab.calculator')}
         </button>
         <button type="button" className={tab === 'log' ? 'on' : ''} aria-current={tab === 'log'} onClick={() => setTab('log')}>
-          Batch log{state.batches.length > 0 ? ` (${state.batches.length})` : ''}
+          {state.batches.length > 0 ? t('tab.log_n', { count: state.batches.length }) : t('tab.log')}
         </button>
       </nav>
     </div>

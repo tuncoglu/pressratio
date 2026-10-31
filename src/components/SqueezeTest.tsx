@@ -1,16 +1,17 @@
 import { formatAmount, formatTsp, squeezeAdvice } from '../calc/calc';
 import type { Batch, Mode, SqueezeState, Unit } from '../calc/types';
+import { m, t, tx, type Msg } from '../i18n';
 
-const STATES: { id: SqueezeState; label: string; sub: string }[] = [
-  { id: 'crumbly', label: 'Slightly crumbly', sub: 'clumps in hand' },
-  { id: 'powdery', label: 'Dry and powdery', sub: "won't clump" },
-  { id: 'sticky', label: 'Smooth sticky ball', sub: 'forms a smooth ball' },
+const STATES: { id: SqueezeState; label: Msg; sub: Msg }[] = [
+  { id: 'crumbly', label: m('sqs.ext.crumbly.label'), sub: m('sqs.ext.crumbly.sub') },
+  { id: 'powdery', label: m('sqs.ext.powdery.label'), sub: m('sqs.ext.powdery.sub') },
+  { id: 'sticky', label: m('sqs.ext.sticky.label'), sub: m('sqs.ext.sticky.sub') },
 ];
 
-const KNEAD_STATES: { id: SqueezeState; label: string; sub: string }[] = [
-  { id: 'crumbly', label: 'Smooth and firm', sub: 'barely tacky, springs back slowly' },
-  { id: 'powdery', label: 'Dry and shaggy', sub: "won't come together" },
-  { id: 'sticky', label: 'Sticky', sub: 'clings to hands and board' },
+const KNEAD_STATES: { id: SqueezeState; label: Msg; sub: Msg }[] = [
+  { id: 'crumbly', label: m('sqs.knead.crumbly.label'), sub: m('sqs.knead.crumbly.sub') },
+  { id: 'powdery', label: m('sqs.knead.powdery.label'), sub: m('sqs.knead.powdery.sub') },
+  { id: 'sticky', label: m('sqs.knead.sticky.label'), sub: m('sqs.knead.sticky.sub') },
 ];
 
 interface Props {
@@ -29,12 +30,12 @@ export function SqueezeTest({ mode, state, onState, unit, flourG, activeBatch, o
   const advice = state ? squeezeAdvice(state, flourG, mode) : null;
   return (
     <div>
-      <p>
-        {rolled
-          ? 'Knead for several minutes, rest 5 minutes, then press a finger into the dough and tap what you feel:'
-          : 'Squeeze a handful of the rested mix, then tap what you feel:'}
-      </p>
-      <div className="squeeze-grid" role="radiogroup" aria-label={rolled ? 'Knead test result' : 'Squeeze test result'}>
+      <p>{rolled ? t('sqs.intro.rolled') : t('sqs.intro.ext')}</p>
+      <div
+        className="squeeze-grid"
+        role="radiogroup"
+        aria-label={rolled ? t('sqs.aria.knead') : t('sqs.aria.squeeze')}
+      >
         {(rolled ? KNEAD_STATES : STATES).map((s) => (
           <button
             key={s.id}
@@ -44,44 +45,36 @@ export function SqueezeTest({ mode, state, onState, unit, flourG, activeBatch, o
             className={`squeeze-btn${state === s.id ? ' selected' : ''}`}
             onClick={() => onState(state === s.id ? null : s.id)}
           >
-            <strong>{s.label}</strong>
-            <span>{s.sub}</span>
+            <strong>{tx(s.label)}</strong>
+            <span>{tx(s.sub)}</span>
           </button>
         ))}
       </div>
 
       {advice && (
         <div className={`advice advice-${advice.verdict}`} role="status">
-          <strong>{advice.action}</strong>
+          <strong>{tx(advice.action)}</strong>
           {advice.verdict === 'add-water' && (
-            <p className="hint">
-              Each step is ~1 % of your flour and raises hydration about 1 point
-              {rolled ? ', so go slowly: the band is only about 7 points wide' : ', a third of the acceptable band'}. A
-              spray bottle spreads small amounts more evenly than pouring.
-            </p>
+            <p className="hint">{rolled ? t('sqs.hint.water.rolled') : t('sqs.hint.water.ext')}</p>
           )}
-          {advice.verdict === 'add-semolina' && (
-            <p className="hint">Each step is ~2 % of your flour. Sprinkle it over and work it in evenly.</p>
-          )}
+          {advice.verdict === 'add-semolina' && <p className="hint">{t('sqs.hint.semolina')}</p>}
           {activeBatch && advice.waterStepG != null && (
             <div className="row">
               <button type="button" className="btn" onClick={() => onLogAdjust({ waterG: advice.waterStepG })}>
-                Log +{formatAmount(advice.waterStepG, unit)} water ({formatTsp(advice.waterStepG)})
+                {t('sqs.logWater', { a: formatAmount(advice.waterStepG, unit), tsp: formatTsp(advice.waterStepG) })}
               </button>
-              <span className="hint">So far: {formatAmount(activeBatch.extraWaterG, unit)}</span>
+              <span className="hint">{t('sqs.soFar', { a: formatAmount(activeBatch.extraWaterG, unit) })}</span>
             </div>
           )}
           {activeBatch && advice.semolinaStepG != null && (
             <div className="row">
               <button type="button" className="btn" onClick={() => onLogAdjust({ semolinaG: advice.semolinaStepG })}>
-                Log +{formatAmount(advice.semolinaStepG, unit)} semolina
+                {t('sqs.logSemolina', { a: formatAmount(advice.semolinaStepG, unit) })}
               </button>
-              <span className="hint">So far: {formatAmount(activeBatch.extraSemolinaG, unit)}</span>
+              <span className="hint">{t('sqs.soFar', { a: formatAmount(activeBatch.extraSemolinaG, unit) })}</span>
             </div>
           )}
-          {advice.verdict !== 'ready' && !activeBatch && (
-            <p className="hint">Start a batch to log what you add. Logged adjustments feed your calibrated target.</p>
-          )}
+          {advice.verdict !== 'ready' && !activeBatch && <p className="hint">{t('sqs.startBatch')}</p>}
         </div>
       )}
     </div>

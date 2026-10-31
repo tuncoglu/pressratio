@@ -1,21 +1,22 @@
-import { BLEND_PRESETS, FLOUR_KEYS, FLOUR_LABELS, blendSum, setShare } from '../calc/calc';
+import { BLEND_PRESETS, FLOUR_KEYS, blendSum, flourName, setShare } from '../calc/calc';
 import type { Blend } from '../calc/types';
+import { t, tx } from '../i18n';
 
 export function BlendEditor({ blend, onChange }: { blend: Blend; onChange: (b: Blend) => void }) {
   const total = blendSum(blend);
   return (
     <fieldset className="card-section">
-      <legend>Flour blend</legend>
+      <legend>{t('blend.legend')}</legend>
       <div className="chips">
         {BLEND_PRESETS.map((p) => (
           <button key={p.id} type="button" className="chip" onClick={() => onChange(p.blend)}>
-            {p.label}
+            {tx(p.label)}
           </button>
         ))}
       </div>
       {FLOUR_KEYS.map((k) => (
         <div className="slider-row" key={k}>
-          <label htmlFor={`blend-${k}`}>{FLOUR_LABELS[k]}</label>
+          <label htmlFor={`blend-${k}`}>{flourName(k)}</label>
           <input
             id={`blend-${k}`}
             type="range"
@@ -25,10 +26,10 @@ export function BlendEditor({ blend, onChange }: { blend: Blend; onChange: (b: B
             value={blend[k]}
             onChange={(e) => onChange(setShare(blend, k, Number(e.target.value)))}
           />
-          <output>{blend[k]} %</output>
+          <output>{t('fmt.pct', { v: blend[k] })}</output>
         </div>
       ))}
-      <p className={total === 100 ? 'hint' : 'hint error'}>Total: {total} % (other flours rebalance automatically)</p>
+      <p className={total === 100 ? 'hint' : 'hint error'}>{t('blend.total', { v: total })}</p>
     </fieldset>
   );
 }

@@ -1,3 +1,5 @@
+import { m, type Msg } from '../i18n';
+
 // All numeric model constants live here.
 //
 // Three groups:
@@ -66,7 +68,7 @@ export const YOLK_WATER_FRACTION = 0.52;
  * XL >= 73 g in shell; class midpoint (XL: 75 g) x IN_SHELL_YIELD.
  */
 export const EGG_SIZES = {
-  usLarge: { label: 'US large', shelledG: 50 },
+  usLarge: { label: m('egg.usLarge'), shelledG: 50 },
   euM: { label: 'EU M (53–63 g)', shelledG: 52 },
   euL: { label: 'EU L (63–73 g)', shelledG: 61 },
   euXL: { label: 'EU XL (73 g+)', shelledG: 67 },
@@ -194,30 +196,15 @@ export type PlaceholderId =
   | 'DOUGH_DENSITY'
   | 'FILLING_G_PER_CM2';
 
-/** Human-readable list, shown in the UI and mirrored in the README. */
-export const PLACEHOLDERS: Record<PlaceholderId, { label: string; value: string }> = {
-  WATER_ONLY_HYDRATION: {
-    label: 'Water-only (no egg) extrusion hydration',
-    value: '30 % of flour weight (same as egg dough until you calibrate it)',
-  },
+/** Human-readable list, shown in the UI and mirrored in the README (English text lives in i18n/en.ts). */
+export const PLACEHOLDERS: Record<PlaceholderId, { label: Msg; value: Msg }> = {
+  WATER_ONLY_HYDRATION: { label: m('ph.WATER_ONLY_HYDRATION.label'), value: m('ph.WATER_ONLY_HYDRATION.value') },
   LYE_WATER_CARBONATE_FRACTION: {
-    label: 'Alkali content of bottled lye water',
-    value: '~25 % by weight (brands vary and rarely publish it)',
+    label: m('ph.LYE_WATER_CARBONATE_FRACTION.label'),
+    value: m('ph.LYE_WATER_CARBONATE_FRACTION.value'),
   },
-  ROLLED_HYDRATION: {
-    label: 'Hydration of hand-rolled egg pasta',
-    value: '37.5 % of flour (1 large egg per 100 g), band 35–42 %; published figures span 28–50 %',
-  },
-  ROLLED_REST: {
-    label: 'Rest time for rolled dough',
-    value: '30 min, up to 60 min for all-coarse-semolina dough (cook-blog consensus)',
-  },
-  DOUGH_DENSITY: {
-    label: 'Egg dough density (for sheet size)',
-    value: '1.1 g/cm³',
-  },
-  FILLING_G_PER_CM2: {
-    label: 'Ravioli filling per cm² of one face',
-    value: '0.2 g/cm² (≈ 5 g for a 5 cm square); override per ravioli',
-  },
+  ROLLED_HYDRATION: { label: m('ph.ROLLED_HYDRATION.label'), value: m('ph.ROLLED_HYDRATION.value') },
+  ROLLED_REST: { label: m('ph.ROLLED_REST.label'), value: m('ph.ROLLED_REST.value') },
+  DOUGH_DENSITY: { label: m('ph.DOUGH_DENSITY.label'), value: m('ph.DOUGH_DENSITY.value') },
+  FILLING_G_PER_CM2: { label: m('ph.FILLING_G_PER_CM2.label'), value: m('ph.FILLING_G_PER_CM2.value') },
 };

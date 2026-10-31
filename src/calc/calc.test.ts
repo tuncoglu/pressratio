@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { tx } from '../i18n';
 import {
   BLEND_PRESETS,
   achievedHydration,
@@ -113,7 +114,7 @@ describe('rolled egg pasta', () => {
   });
   it('has a smooth-ball texture target and no roller warning', () => {
     const r = calculate({ ...rolled, machine: 'roller' });
-    expect(r.textureTarget).toContain('smooth, firm ball');
+    expect(tx(r.textureTarget!)).toContain('smooth, firm ball');
     expect(r.warnings.map((w) => w.id)).not.toContain('roller-extruded');
   });
   it('rest: 30 min plain, 60 min all-coarse semolina; temperature shifts as before', () => {
@@ -122,7 +123,7 @@ describe('rolled egg pasta', () => {
     expect(restPlan(COARSE, 20, 'rolled')).toMatchObject({ minMin: 60, maxMin: 75 });
     expect(restPlan(COARSE, 15, 'rolled').minMin).toBe(70);
     expect(restPlan(COARSE, 30, 'rolled').minMin).toBe(55);
-    expect(restPlan(COARSE, 20, 'rolled').notes.join(' ')).toContain('Wrapping stops a dry skin');
+    expect(restPlan(COARSE, 20, 'rolled').notes.map(tx).join(' ')).toContain('Wrapping stops a dry skin');
   });
   it('warns that an all-coarse dough rolls gritty; not for blends', () => {
     expect(calculate(rolled).warnings.map((w) => w.id)).toContain('rolled-all-coarse');
@@ -132,14 +133,14 @@ describe('rolled egg pasta', () => {
   });
   it('knead test: wait 5 min before adding water; sticky -> knead in flour', () => {
     const dry = squeezeAdvice('powdery', 420, 'rolled');
-    expect(dry.action).toContain('Rest it 5 minutes first');
+    expect(tx(dry.action)).toContain('Rest it 5 minutes first');
     expect(dry.waterStepG).toBe(4);
-    expect(squeezeAdvice('crumbly', 420, 'rolled').action).toBe('Ready. Wrap it and rest, then roll.');
+    expect(tx(squeezeAdvice('crumbly', 420, 'rolled').action)).toBe('Ready. Wrap it and rest, then roll.');
     const wet = squeezeAdvice('sticky', 420, 'rolled');
     expect(wet.verdict).toBe('add-semolina');
     expect(wet.semolinaStepG).toBe(8);
     // the pressed-dough wording is unchanged
-    expect(squeezeAdvice('crumbly', 420).action).toBe('Ready. Load the press.');
+    expect(tx(squeezeAdvice('crumbly', 420).action)).toBe('Ready. Load the press.');
   });
   it('sheet area from dough weight and thickness', () => {
     // 630 g dough at 1 mm, 1.1 g/cm³ -> 5727 cm²
@@ -214,7 +215,7 @@ describe('alkaline noodles', () => {
   it('scales from egg at 35 % of flour and shows baker percentages', () => {
     const r = calculate(alk);
     expect(r.flourTotalG).toBeCloseTo(500, 6);
-    const by = Object.fromEntries(r.ingredients.map((i) => [i.label.trim(), i]));
+    const by = Object.fromEntries(r.ingredients.map((i) => [tx(i.label), i]));
     expect(by['Baked baking soda (sodium carbonate)'].grams).toBeCloseTo(7.5, 6);
     expect(by['Salt'].grams).toBeCloseTo(3.5, 6);
     expect(by['Egg (shelled)'].pct).toBeCloseTo(35, 6);
@@ -234,8 +235,8 @@ describe('alkaline noodles', () => {
   });
 
   it('shows the baking-soda weight before baking (x 168/106)', () => {
-    const soda = calculate(alk).ingredients.find((i) => i.label.startsWith('Baked'))!;
-    expect(soda.note).toBe('= 11.9 g baking soda before baking');
+    const soda = calculate(alk).ingredients.find((i) => tx(i.label).startsWith('Baked'))!;
+    expect(tx(soda.note!)).toBe('= 11.9 g baking soda before baking');
   });
 
   it('lye water replaces soda, warns, and is marked unvalidated', () => {
@@ -245,7 +246,7 @@ describe('alkaline noodles', () => {
     expect(r.uncalibrated).toContain('LYE_WATER_CARBONATE_FRACTION');
     // 2 g x 0.25 alkali / 500 g flour = 0.1 %
     expect(r.lyeAlkaliPct).toBeCloseTo(0.1, 9);
-    expect(r.ingredients.some((i) => i.label.startsWith('Baked baking soda'))).toBe(false);
+    expect(r.ingredients.some((i) => tx(i.label).startsWith('Baked baking soda'))).toBe(false);
     expect(r.totalLiquidG).toBeCloseTo(175 + 50 + 2, 6);
   });
 
@@ -261,7 +262,7 @@ describe('alkaline noodles', () => {
     expect(r.addedWaterG).toBeCloseTo(28.75, 6);
     expect(r.hydration).toBeCloseTo(0.32, 9);
     expect(r.calibration).toEqual({ target: 0.32, n: 3 });
-    expect(r.ingredients.find((i) => i.label === 'Added water')!.note).toBe('your calibrated target');
+    expect(tx(r.ingredients.find((i) => tx(i.label) === 'Added water')!.note!)).toBe('your calibrated target');
     expect(r.warnings.map((w) => w.id)).not.toContain('alkaline-wet-for-press');
   });
   it("the user's own added water beats calibration", () => {
@@ -293,9 +294,10 @@ describe('alkaline noodles', () => {
     expect(r.hydration).toBeCloseTo(0.3625, 6);
     expect(r.warnings.map((w) => w.id)).toContain('alkaline-wet-for-press');
     const text = r.warnings.find((w) => w.id === 'alkaline-wet-for-press')!.text;
-    expect(text).toContain('28–34 % total water');
-    expect(text).toContain('above that range');
-    expect(text).toContain('≈ 19 g added water');
+    const msg = tx(text);
+    expect(msg).toContain('28–34 % total water');
+    expect(msg).toContain('above that range');
+    expect(msg).toContain('≈ 19 g added water');
     expect(calculate({ ...alk, machine: 'roller' }).warnings.map((w) => w.id)).not.toContain('alkaline-wet-for-press');
   });
 });
@@ -328,7 +330,7 @@ describe('rest time', () => {
     expect(restPlan(COARSE, 20).holdLimitH).toBe(2);
     expect(restPlan(COARSE, 32).holdLimitH).toBe(2);
     expect(restPlan(COARSE, 33).holdLimitH).toBe(1);
-    expect(restPlan(COARSE, 33).notes.join(' ')).toContain('no more than 1 hour');
+    expect(restPlan(COARSE, 33).notes.map(tx).join(' ')).toContain('no more than 1 hour');
   });
 });
 
@@ -336,18 +338,18 @@ describe('squeeze test', () => {
   it('crumbly -> ready', () => {
     const a = squeezeAdvice('crumbly');
     expect(a.verdict).toBe('ready');
-    expect(a.action).toBe('Ready. Load the press.');
+    expect(tx(a.action)).toBe('Ready. Load the press.');
   });
   it('powdery -> add water; ~1 tsp for the ~500 g reference batch', () => {
     const a = squeezeAdvice('powdery', 525);
     expect(a.verdict).toBe('add-water');
     expect(a.waterStepG).toBe(5.5);
-    expect(a.action).toBe('Add water 5.5 g (≈ 1 tsp) at a time, mix, rest 5–10 min, retest.');
+    expect(tx(a.action)).toBe('Add water 5.5 g (≈ 1 tsp) at a time, mix, rest 5–10 min, retest.');
   });
   it('sticky -> add semolina; ~10 g for the reference batch', () => {
     const a = squeezeAdvice('sticky', 525);
     expect(a.verdict).toBe('add-semolina');
-    expect(a.action).toBe('Too wet for extrusion. Add semolina 11 g at a time.');
+    expect(tx(a.action)).toBe('Too wet for extrusion. Add semolina 11 g at a time.');
     expect(squeezeAdvice('sticky', 500).semolinaStepG).toBe(10);
   });
   it('steps scale with batch size so each moves hydration about the same', () => {

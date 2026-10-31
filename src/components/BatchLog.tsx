@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { FLOUR_KEYS, FLOUR_LABELS, achievedHydration, deltaVsPrevious, describeDelta, formatAmount, round } from '../calc/calc';
+import { FLOUR_KEYS, achievedHydration, deltaVsPrevious, describeDelta, flourNameLc, formatAmount, round } from '../calc/calc';
+import { localeTag, n, pct, t, tp, tx } from '../i18n';
 import type { Batch, Unit } from '../calc/types';
 import { BIGOLARO_MODELS, type BigolaroModel } from '../data/bottene';
 import { flourById } from '../data/flours';
@@ -21,7 +22,7 @@ const blendSummary = (b: Batch) =>
   FLOUR_KEYS.filter((k) => b.blend[k] > 0)
     .map((k) => {
       const f = flourById(b.flours?.[k]);
-      return `${b.blend[k]} % ${f?.product ? f.label : FLOUR_LABELS[k].toLowerCase()}`;
+      return `${pct(b.blend[k])} ${f?.product ? tx(f.label!) : flourNameLc(k)}`;
     })
     .join(' / ');
 
@@ -45,7 +46,8 @@ function withDate(iso: string, ymd: string): string {
 export function BatchLog({ batches, unit, activeBatchId, onChange }: Props) {
   const [editing, setEditing] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  // The text is a function so it is translated when shown, not when it was produced.
+  const [message, setMessage] = useState<{ ok: boolean; text: () => string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const update = (id: string, patch: Partial<Batch>) =>
@@ -61,19 +63,22 @@ export function BatchLog({ batches, unit, activeBatchId, onChange }: Props) {
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    setMessage({ ok: true, text: `Exported ${batches.length} batch${batches.length === 1 ? '' : 'es'}.` });
+    const count = batches.length;
+    setMessage({ ok: true, text: () => tp('log.exported', count) });
   };
 
   const doImport = async (file: File | undefined) => {
     if (!file) return;
     const res = parseImport(await file.text());
     if (!res.ok) {
-      setMessage({ ok: false, text: res.error });
+      setMessage({ ok: false, text: () => tx(res.error) });
     } else {
       onChange(mergeBatches(batches, res.batches));
+      const { skipped } = res;
+      const count = res.batches.length;
       setMessage({
         ok: true,
-        text: `Imported ${res.batches.length} batch${res.batches.length === 1 ? '' : 'es'}${res.skipped ? ` (${res.skipped} skipped as unreadable)` : ''}. Same-id batches were overwritten.`,
+        text: () => (skipped ? tp('log.importedSkipped', count, { skipped }) : tp('log.imported', count)),
       });
     }
     if (fileRef.current) fileRef.current.value = '';
@@ -84,13 +89,13 @@ export function BatchLog({ batches, unit, activeBatchId, onChange }: Props) {
   return (
     <div className="stack">
       <section className="card">
-        <h2>Batch log</h2>
+        <h2>{t('log.title')}</h2>
         <div className="row">
           <button type="button" className="btn" onClick={doExport} disabled={batches.length === 0}>
-            Export JSON
+            {t('log.export')}
           </button>
           <button type="button" className="btn" onClick={() => fileRef.current?.click()}>
-            Import JSON
+            {t('log.import')}
           </button>
           <input
             ref={fileRef}
@@ -102,18 +107,15 @@ export function BatchLog({ batches, unit, activeBatchId, onChange }: Props) {
         </div>
         {message && (
           <p className={message.ok ? 'ok' : 'error'} role="status">
-            {message.text}
+            {message.text()}
           </p>
         )}
-        <p className="hint">Everything stays on this device. Export to back it up or move it to another phone.</p>
-        <p className="hint">
-          Rate batches and log the water or semolina you add. Once two or more batches with the same machine are rated
-          4+, the calculator offers their median hydration as your own target.
-        </p>
+        <p className="hint">{t('log.hintLocal')}</p>
+        <p className="hint">{t('log.hintRate')}</p>
       </section>
 
       {sorted.length === 0 && (
-        <p className="muted center">No batches yet. Start one from the Calculator tab.</p>
+        <p className="muted center">{t('log.empty')}</p>
       )}
 
       {sorted.map((b) => {
@@ -123,13 +125,13 @@ export function BatchLog({ batches, unit, activeBatchId, onChange }: Props) {
           <article key={b.id} className={`card batch${b.id === activeBatchId ? ' active' : ''}`}>
             <header className="batch-head">
               <div>
-                <strong>{new Date(b.createdAt).toLocaleDateString()}</strong>{' '}
-                <span className="tag">{MODE_SHORT[b.mode]}</span>
-                {b.id === activeBatchId && <span className="tag tag-active">current</span>}
+                <strong>{new Date(b.createdAt).toLocaleDateString(localeTag())}</strong>{' '}
+                <span className="tag">{tx(MODE_SHORT[b.mode])}</span>
+                {b.id === activeBatchId && <span className="tag tag-active">{t('log.current')}</span>}
               </div>
               <div className="row">
                 <button type="button" className="btn btn-small" onClick={() => setEditing(isEditing ? null : b.id)}>
-                  {isEditing ? 'Done' : 'Edit'}
+                  {isEditing ? t('log.done') : t('log.edit')}
                 </button>
                 <button
                   type="button"
@@ -143,70 +145,71 @@ export function BatchLog({ batches, unit, activeBatchId, onChange }: Props) {
                   }}
                   onBlur={() => setConfirmDelete(null)}
                 >
-                  {confirmDelete === b.id ? 'Tap to confirm' : 'Delete'}
+                  {confirmDelete === b.id ? t('log.confirm') : t('log.delete')}
                 </button>
               </div>
             </header>
 
             <dl className="kv compact">
               <div>
-                <dt>Flour</dt>
+                <dt>{t('log.flour')}</dt>
                 <dd>
                   {formatAmount(b.flourTotalG, unit)} — {blendSummary(b)}
                 </dd>
               </div>
               <div>
-                <dt>Liquid</dt>
+                <dt>{t('log.liquid')}</dt>
                 <dd>
-                  {formatAmount(b.eggShelledG, unit)} egg
-                  {b.yolkG > 0 && ` + ${formatAmount(b.yolkG, unit)} yolk`}
-                  {b.addedWaterG > 0 && ` + ${formatAmount(b.addedWaterG, unit)} water`}
-                  {b.lyeWaterG > 0 && ` + ${formatAmount(b.lyeWaterG, unit)} lye water`}
+                  {t('log.liq.egg', { a: formatAmount(b.eggShelledG, unit) })}
+                  {b.yolkG > 0 && t('log.liq.yolk', { a: formatAmount(b.yolkG, unit) })}
+                  {b.addedWaterG > 0 && t('log.liq.water', { a: formatAmount(b.addedWaterG, unit) })}
+                  {b.lyeWaterG > 0 && t('log.liq.lye', { a: formatAmount(b.lyeWaterG, unit) })}
                 </dd>
               </div>
               <div>
-                <dt>Hydration</dt>
+                <dt>{t('log.hydration')}</dt>
                 <dd>
-                  {round(achievedHydration(b) * 100, 1)} % reached
-                  {Math.abs(achievedHydration(b) - b.hydration) > 0.0005 && ` (planned ${round(b.hydration * 100, 1)} %)`}
+                  {t('log.reached', { v: pct(round(achievedHydration(b) * 100, 1)) })}
+                  {Math.abs(achievedHydration(b) - b.hydration) > 0.0005 &&
+                    t('log.planned', { v: pct(round(b.hydration * 100, 1)) })}
                 </dd>
               </div>
               <div>
-                <dt>Rest</dt>
+                <dt>{t('log.rest')}</dt>
                 <dd>
-                  {b.restMinMin}–{b.restMaxMin} min
+                  {t('res.restTime', { a: b.restMinMin, b: b.restMaxMin })}
                 </dd>
               </div>
               <div>
-                <dt>Adjustments</dt>
+                <dt>{t('log.adjustments')}</dt>
                 <dd>
-                  +{formatAmount(b.extraWaterG, unit)} water, +{formatAmount(b.extraSemolinaG, unit)} semolina
+                  {t('log.adjVal', { w: formatAmount(b.extraWaterG, unit), s: formatAmount(b.extraSemolinaG, unit) })}
                 </dd>
               </div>
               <div>
-                <dt>Setup</dt>
+                <dt>{t('log.setup')}</dt>
                 <dd>
-                  {MACHINES[b.machine].label}
+                  {tx(MACHINES[b.machine].label)}
                   {b.pressModel && ` ${BIGOLARO_MODELS[b.pressModel as BigolaroModel]?.label ?? ''}`}
                   {b.die && `, ${b.die}`}
-                  {b.ambientC != null && `, ${b.ambientC} °C`}
+                  {b.ambientC != null && `, ${n(b.ambientC)} °C`}
                 </dd>
               </div>
             </dl>
 
-            <div className="rating" role="radiogroup" aria-label="Outcome rating">
-              <span>Outcome</span>
-              {[1, 2, 3, 4, 5].map((n) => (
+            <div className="rating" role="radiogroup" aria-label={t('log.outcomeAria')}>
+              <span>{t('log.outcome')}</span>
+              {[1, 2, 3, 4, 5].map((i) => (
                 <button
-                  key={n}
+                  key={i}
                   type="button"
                   role="radio"
-                  aria-checked={b.rating === n}
-                  aria-label={`${n} of 5`}
-                  className={`star${b.rating != null && n <= b.rating ? ' on' : ''}`}
-                  onClick={() => update(b.id, { rating: b.rating === n ? null : n })}
+                  aria-checked={b.rating === i}
+                  aria-label={t('log.stars', { n: i })}
+                  className={`star${b.rating != null && i <= b.rating ? ' on' : ''}`}
+                  onClick={() => update(b.id, { rating: b.rating === i ? null : i })}
                 >
-                  {n}
+                  {i}
                 </button>
               ))}
             </div>
@@ -214,12 +217,12 @@ export function BatchLog({ batches, unit, activeBatchId, onChange }: Props) {
             {delta && <p className="delta">{describeDelta(delta, unit)}</p>}
 
             <div className="field">
-              <label htmlFor={`notes-${b.id}`}>Notes</label>
+              <label htmlFor={`notes-${b.id}`}>{t('log.notes')}</label>
               <textarea
                 id={`notes-${b.id}`}
                 rows={2}
                 value={b.notes}
-                placeholder="How did it press? Texture, tearing, cook result…"
+                placeholder={t('log.notesHint')}
                 onChange={(e) => update(b.id, { notes: e.target.value })}
               />
             </div>
@@ -235,9 +238,9 @@ export function BatchLog({ batches, unit, activeBatchId, onChange }: Props) {
 function BatchEditor({ batch: b, unit, onChange }: { batch: Batch; unit: Unit; onChange: (p: Partial<Batch>) => void }) {
   return (
     <div className="editor">
-      <h3>Edit batch</h3>
+      <h3>{t('log.editBatch')}</h3>
       <div className="field">
-        <label htmlFor={`date-${b.id}`}>Date</label>
+        <label htmlFor={`date-${b.id}`}>{t('log.date')}</label>
         <input
           id={`date-${b.id}`}
           type="date"
@@ -246,19 +249,19 @@ function BatchEditor({ batch: b, unit, onChange }: { batch: Batch; unit: Unit; o
         />
       </div>
       <div className="field">
-        <label htmlFor={`die-${b.id}`}>Die</label>
+        <label htmlFor={`die-${b.id}`}>{t('log.die')}</label>
         <input id={`die-${b.id}`} type="text" value={b.die} onChange={(e) => onChange({ die: e.target.value })} />
       </div>
-      <NumField label={`Egg, shelled (${unit})`} value={b.eggShelledG} unit={unit} suffix={unit} onChange={(v) => onChange({ eggShelledG: v ?? 0 })} />
-      <NumField label={`Extra yolks (${unit})`} value={b.yolkG} unit={unit} suffix={unit} onChange={(v) => onChange({ yolkG: v ?? 0 })} />
-      <NumField label={`Added water (${unit})`} value={b.addedWaterG} unit={unit} suffix={unit} onChange={(v) => onChange({ addedWaterG: v ?? 0 })} />
-      <NumField label={`Extra water added during adjustment (${unit})`} value={b.extraWaterG} unit={unit} suffix={unit} onChange={(v) => onChange({ extraWaterG: v ?? 0 })} />
-      <NumField label={`Extra semolina added during adjustment (${unit})`} value={b.extraSemolinaG} unit={unit} suffix={unit} onChange={(v) => onChange({ extraSemolinaG: v ?? 0 })} />
-      <NumField label={`Total flour (${unit})`} value={b.flourTotalG} unit={unit} suffix={unit} onChange={(v) => onChange({ flourTotalG: v ?? 0 })} />
-      <NumField label="Rest, min (minutes)" value={b.restMinMin} suffix="min" onChange={(v) => onChange({ restMinMin: v ?? 0 })} />
-      <NumField label="Rest, max (minutes)" value={b.restMaxMin} suffix="min" onChange={(v) => onChange({ restMaxMin: v ?? 0 })} />
+      <NumField label={t('log.ed.egg', { unit })} value={b.eggShelledG} unit={unit} suffix={unit} onChange={(v) => onChange({ eggShelledG: v ?? 0 })} />
+      <NumField label={t('log.ed.yolk', { unit })} value={b.yolkG} unit={unit} suffix={unit} onChange={(v) => onChange({ yolkG: v ?? 0 })} />
+      <NumField label={t('log.ed.water', { unit })} value={b.addedWaterG} unit={unit} suffix={unit} onChange={(v) => onChange({ addedWaterG: v ?? 0 })} />
+      <NumField label={t('log.ed.extraWater', { unit })} value={b.extraWaterG} unit={unit} suffix={unit} onChange={(v) => onChange({ extraWaterG: v ?? 0 })} />
+      <NumField label={t('log.ed.extraSemolina', { unit })} value={b.extraSemolinaG} unit={unit} suffix={unit} onChange={(v) => onChange({ extraSemolinaG: v ?? 0 })} />
+      <NumField label={t('log.ed.flour', { unit })} value={b.flourTotalG} unit={unit} suffix={unit} onChange={(v) => onChange({ flourTotalG: v ?? 0 })} />
+      <NumField label={t('log.ed.restMin')} value={b.restMinMin} suffix="min" onChange={(v) => onChange({ restMinMin: v ?? 0 })} />
+      <NumField label={t('log.ed.restMax')} value={b.restMaxMin} suffix="min" onChange={(v) => onChange({ restMaxMin: v ?? 0 })} />
       <NumField
-        label="Ambient temperature (°C)"
+        label={t('log.ed.ambient')}
         value={b.ambientC}
         nullable
         suffix="°C"

@@ -6,6 +6,7 @@ export type Blend = Record<FlourKey, number>;
 export type Unit = 'g' | 'oz';
 
 import type { EggSize } from './constants';
+import type { Msg } from '../i18n';
 
 export type EggKind = 'shelled' | 'count' | 'inShell';
 export interface EggInput {
@@ -41,7 +42,7 @@ export interface CalcInput {
 export interface Warning {
   id: string;
   level: 'warn' | 'info';
-  text: string;
+  text: Msg;
 }
 
 export interface RestPlan {
@@ -51,15 +52,17 @@ export interface RestPlan {
   coarseShare: number;
   /** Max total hours raw-egg dough should sit unrefrigerated. */
   holdLimitH: number;
-  notes: string[];
+  notes: Msg[];
 }
 
 export interface IngredientRow {
-  label: string;
+  label: Msg;
+  /** Shown indented under its parent row. */
+  indent?: boolean;
   grams: number;
   /** Baker's percentage (of total flour weight). */
   pct: number;
-  note?: string;
+  note?: Msg;
 }
 
 export type CalcStatus = 'ok' | 'empty' | 'invalid-blend' | 'unsupported';
@@ -67,7 +70,7 @@ export type CalcStatus = 'ok' | 'empty' | 'invalid-blend' | 'unsupported';
 export interface CalcResult {
   status: CalcStatus;
   /** Why there are no numbers, when status is not 'ok'. */
-  message?: string;
+  message?: Msg;
   eggShelledG: number;
   yolkG: number;
   eggWaterG: number;
@@ -84,7 +87,7 @@ export interface CalcResult {
   /** Water as a fraction of flour weight. */
   hydration: number;
   hydrationRange: [number, number];
-  textureTarget: string;
+  textureTarget: Msg | null;
   rest: RestPlan;
   ingredients: IngredientRow[];
   /** Suggested added-water range in grams (alkaline mode). */
@@ -117,8 +120,8 @@ export type SqueezeState = 'crumbly' | 'powdery' | 'sticky';
 export interface SqueezeAdvice {
   state: SqueezeState;
   verdict: 'ready' | 'add-water' | 'add-semolina';
-  title: string;
-  action: string;
+  title: Msg;
+  action: Msg;
   /** Grams of water to add per step (add-water only). */
   waterStepG?: number;
   /** Grams of semolina to add per step (add-semolina only). */

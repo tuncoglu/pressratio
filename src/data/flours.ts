@@ -1,4 +1,5 @@
 import type { FlourKey } from '../calc/types';
+import { m, type Msg, type Text } from '../i18n';
 
 // Flours you can pick for each blend slot. Shipton Mill figures come from the
 // SourDough project's catalogue (protein = midpoint of Shipton's spec range,
@@ -9,7 +10,8 @@ export interface FlourSpec {
   id: string;
   /** Which blend slot it fills. */
   role: FlourKey;
-  label: string;
+  /** Brand names are shown as they are; generic entries are translated. */
+  label: Text;
   /** Shipton product number. */
   product?: string;
   protein?: number;
@@ -18,7 +20,7 @@ export interface FlourSpec {
   /** Alveograph tenacity / extensibility ratio. */
   pl?: number;
   ash?: string;
-  note?: string;
+  note?: Msg;
 }
 
 export const FLOURS: FlourSpec[] = [
@@ -32,7 +34,7 @@ export const FLOURS: FlourSpec[] = [
     w: 340,
     pl: 1.0,
     ash: '0.45–0.50 %',
-    note: 'Very fine, low ash, strong.',
+    note: m('flour.note.118'),
   },
   {
     id: 'shipton-120',
@@ -43,9 +45,9 @@ export const FLOURS: FlourSpec[] = [
     w: 320,
     pl: 0.8,
     ash: '0.45–0.55 %',
-    note: 'Organic; slightly more extensible (lower P/L) than 118.',
+    note: m('flour.note.120'),
   },
-  { id: 'generic-00', role: 'type00', label: 'Other type 00' },
+  { id: 'generic-00', role: 'type00', label: m('flour.otherType00') },
 
   // Coarse semolina
   {
@@ -54,16 +56,16 @@ export const FLOURS: FlourSpec[] = [
     label: 'Shipton Organic Semolina (507)',
     product: '507',
     protein: 12.5,
-    note: 'Durum semolina grit. Shipton does not publish W or particle size.',
+    note: m('flour.note.507'),
   },
-  { id: 'generic-coarse', role: 'coarseSemolina', label: 'Other coarse semolina' },
+  { id: 'generic-coarse', role: 'coarseSemolina', label: m('flour.otherCoarse') },
 
   // Fine semolina (semola rimacinata)
   {
     id: 'generic-fine',
     role: 'fineSemolina',
-    label: 'Fine semolina (semola rimacinata)',
-    note: 'Shipton does not list a re-milled durum flour.',
+    label: m('flour.fineGeneric'),
+    note: m('flour.note.fine'),
   },
 
   // Bread flour
@@ -93,7 +95,7 @@ export const FLOURS: FlourSpec[] = [
     product: '112',
     protein: 14.5,
     ash: '0.56–0.60 %',
-    note: 'Spec range 14.1–15.3 % protein.',
+    note: m('flour.note.112'),
   },
   {
     id: 'shipton-101',
@@ -102,7 +104,7 @@ export const FLOURS: FlourSpec[] = [
     product: '101',
     protein: 11.5,
   },
-  { id: 'generic-bread', role: 'breadFlour', label: 'Other bread flour' },
+  { id: 'generic-bread', role: 'breadFlour', label: m('flour.otherBread') },
 ];
 
 export type FlourChoice = Record<FlourKey, string>;

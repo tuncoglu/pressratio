@@ -6,45 +6,49 @@
 // are Bottene's die widths. Thicknesses are PLACEHOLDERS — tune to your pin
 // (lasagne is set to 1.5 mm at the owner's request).
 
+import { m, type Msg } from '../i18n';
+
 export type RollShape = 'ribbons' | 'ravioli' | 'lasagne';
 
 export interface ShapeSpec {
-  label: string;
-  /** Short name stored on batches. */
-  short: string;
+  label: Msg;
+  /** Short name; stored on batches in the language it was created in. */
+  short: Msg;
+  /** The short name for use inside a sentence. */
+  shortLc: Msg;
   thicknessMm: number;
   rangeMm: [number, number];
-  note: string;
+  note: Msg;
+  /** Cut names and widths; Italian pasta names, shown as they are. */
   cuts?: string[];
 }
 
 export const ROLL_SHAPES: Record<RollShape, ShapeSpec> = {
   ribbons: {
-    label: 'Ribbons (tagliatelle, fettuccine, pappardelle)',
-    short: 'Ribbons',
+    label: m('shape.ribbons.label'),
+    short: m('shape.ribbons.short'),
+    shortLc: m('shape.ribbons.lc'),
     thicknessMm: 1,
     rangeMm: [0.8, 1.2],
-    note: 'Bolognese tagliatelle are rolled a little under 1 mm. Thicker ribbons (up to ~2 mm) suit a hearty sauce.',
+    note: m('shape.ribbons.note'),
     cuts: ['Tagliolini 3.5 mm', 'Tagliatelle / fettuccine 6–7 mm', 'Pappardelle 14–20 mm'],
   },
   ravioli: {
-    label: 'Ravioli (filled)',
-    short: 'Ravioli',
+    label: m('shape.ravioli.label'),
+    short: m('shape.ravioli.short'),
+    shortLc: m('shape.ravioli.lc'),
     thicknessMm: 0.8,
     rangeMm: [0.6, 1],
-    note: 'Roll to 1 mm or thinner: the dough doubles where it folds over the filling, so thick sheets cook gummy at the seam.',
+    note: m('shape.ravioli.note'),
   },
   lasagne: {
-    label: 'Lasagne sheets',
-    short: 'Lasagne',
+    label: m('shape.lasagne.label'),
+    short: m('shape.lasagne.short'),
+    shortLc: m('shape.lasagne.lc'),
     thicknessMm: 1.5,
     rangeMm: [1, 2],
-    note: 'Set to 1.5 mm for your pin. Published sources disagree (about 0.5 to 1 mm); thicker sheets hold up better in a bake but need longer to cook.',
+    note: m('shape.lasagne.note'),
   },
 };
 
-export const ROLL_TIPS = [
-  'Wrap the dough while it rests and keep the piece you are not rolling covered: it dries into a crust quickly (Sirman).',
-  'Roll from the centre outwards, turning the sheet a quarter turn often; a long, completely flat pin and a flat board give the most even sheet (Michelin Guide).',
-  'Dust with semolina rather than flour so the sheet does not absorb extra water.',
-];
+export const ROLL_TIPS: Msg[] = [m('roll.tip1'), m('roll.tip2'), m('roll.tip3')];

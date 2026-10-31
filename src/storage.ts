@@ -5,6 +5,7 @@ import { ROLL_SHAPES, type RollShape } from './data/rolled';
 import { AUTO_TEMP_MAX_AGE_MS } from './lib/weather';
 import type { Batch, Blend, EggKind, FlourKey, Machine, Mode, Unit } from './calc/types';
 import { FLOUR_KEYS, blendSum } from './calc/calc';
+import { detectLocale, isLocale, m, type Locale, type Msg } from './i18n';
 
 const KEY = 'pressratio.v1';
 
@@ -44,6 +45,8 @@ export interface FormState {
 
 export interface AppState {
   unit: Unit;
+  /** Interface language; first visit uses the browser's language. */
+  locale: Locale;
   form: FormState;
   batches: Batch[];
   activeBatchId: string | null;
@@ -78,6 +81,7 @@ export const DEFAULT_FORM: FormState = {
 
 export const DEFAULT_STATE: AppState = {
   unit: 'g',
+  locale: 'en',
   form: DEFAULT_FORM,
   batches: [],
   activeBatchId: null,
@@ -86,16 +90,17 @@ export const DEFAULT_STATE: AppState = {
 export function loadState(): AppState {
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return DEFAULT_STATE;
+    if (!raw) return { ...DEFAULT_STATE, locale: detectLocale() };
     const p = JSON.parse(raw);
     return {
       unit: p.unit === 'oz' ? 'oz' : 'g',
+      locale: isLocale(p.locale) ? p.locale : detectLocale(),
       form: sanitizeForm(p.form),
       batches: Array.isArray(p.batches) ? p.batches.map(sanitizeBatch).filter(isBatch) : [],
       activeBatchId: typeof p.activeBatchId === 'string' ? p.activeBatchId : null,
     };
   } catch {
-    return DEFAULT_STATE;
+    return { ...DEFAULT_STATE, locale: detectLocale() };
   }
 }
 
@@ -210,18 +215,18 @@ function isBatch(b: Batch | null): b is Batch {
 
 export type ImportResult =
   | { ok: true; batches: Batch[]; skipped: number }
-  | { ok: false; error: string };
+  | { ok: false; error: Msg };
 
 export function parseImport(text: string): ImportResult {
   let data: unknown;
   try {
     data = JSON.parse(text);
   } catch {
-    return { ok: false, error: 'That file is not valid JSON.' };
+    return { ok: false, error: m('imp.invalid') };
   }
   const o = data as { app?: unknown; batches?: unknown } | null;
   if (!o || o.app !== EXPORT_APP || !Array.isArray(o.batches)) {
-    return { ok: false, error: 'That file is not a PressRatio export.' };
+    return { ok: false, error: m('imp.notExport') };
   }
   const batches = o.batches.map(sanitizeBatch).filter(isBatch);
   return { ok: true, batches, skipped: o.batches.length - batches.length };

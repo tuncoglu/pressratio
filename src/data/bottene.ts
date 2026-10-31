@@ -2,6 +2,8 @@
 // Sources: Bottene "Bigolaro" leaflet (technical data table), Bottene
 // "Catalogo trafile" (Nov 2024), and the Bigolaro 8/B die chart compiled from it.
 
+import { m, t, type Msg } from '../i18n';
+
 // ---- Bigolaro (manual press) -------------------------------------------
 
 export type BigolaroModel = '4' | '5' | '6' | '7' | '8' | 'B';
@@ -35,7 +37,7 @@ export interface Die {
   /** Electric: models this die is not made for. */
   notOn?: ElectricModel[];
   /** Electric: size differs by model. */
-  sizeNote?: string;
+  sizeNote?: Msg;
 }
 
 /**
@@ -123,13 +125,13 @@ export const ELECTRIC_DIES: Die[] = [
   { id: '31', code: '31', name: 'Maccheroni lisci', dims: 'Ø10.5 mm' },
   { id: '32', code: '32', name: 'Maccheroni lisci', dims: 'Ø14 mm' },
   { id: '33', code: '33', name: 'Maccheroni lisci', dims: 'Ø20 mm' },
-  { id: '34', code: '34', name: 'Cannellone', dims: 'Ø30/35 mm', notOn: NOT_LILLO, sizeNote: '30 mm on PM35, 35 mm on larger models' },
+  { id: '34', code: '34', name: 'Cannellone', dims: 'Ø30/35 mm', notOn: NOT_LILLO, sizeNote: m('die.size.pm35') },
   { id: '35', code: '35', name: 'Maccheroni rigati', dims: 'Ø4.5 mm' },
   { id: '36', code: '36', name: 'Maccheroni rigati', dims: 'Ø7.5 mm' },
   { id: '37', code: '37', name: 'Maccheroni rigati', dims: 'Ø10.5 mm' },
   { id: '38', code: '38', name: 'Maccheroni rigati', dims: 'Ø14 mm' },
   { id: '39', code: '39', name: 'Maccheroni rigati', dims: 'Ø20 mm' },
-  { id: '40', code: '40', name: 'Maccheroni rigati', dims: 'Ø30/35 mm', notOn: NOT_LILLO, sizeNote: '30 mm on PM35, 35 mm on larger models' },
+  { id: '40', code: '40', name: 'Maccheroni rigati', dims: 'Ø30/35 mm', notOn: NOT_LILLO, sizeNote: m('die.size.pm35') },
   { id: 'gargato', name: 'Gargato veneto', dims: 'Ø8 mm, wall 1.5 mm', special: true },
   { id: 'paccheri', name: 'Paccheri', dims: 'Ø25 mm, wall 1.4 mm' },
   { id: '117R', code: '117R', name: 'Penne rigate', dims: 'Ø8.8 mm', special: true, notOn: ['lillodue', 'pm35'] },
@@ -143,17 +145,17 @@ export const ELECTRIC_DIES: Die[] = [
   { id: '91', code: '91', name: 'Gramigna', dims: 'Ø3 mm' },
   { id: '41', code: '41', name: 'Conchiglia', dims: '37 mm', notOn: NOT_LILLO },
   { id: '42', code: '42', name: 'Gnocchi', dims: '27 mm', notOn: NOT_LILLO },
-  { id: '43', code: '43', name: 'Gnocchi sardi', dims: '16/19 mm', sizeNote: '16 mm on Lillodue, 19 mm on others' },
+  { id: '43', code: '43', name: 'Gnocchi sardi', dims: '16/19 mm', sizeNote: m('die.size.lillo') },
   { id: '44', code: '44', name: 'Orecchiette', dims: '18 mm', notOn: NOT_LILLO },
   { id: '45', code: '45', name: 'Canestri lisci', dims: '15 mm', notOn: NOT_LILLO },
   { id: '46', code: '46', name: 'Canestri rigati', dims: '16 mm', notOn: NOT_LILLO },
-  { id: '47', code: '47', name: 'Ruote', dims: '16.5/25.4 mm', sizeNote: '25.4 mm on PM96/PM120' },
+  { id: '47', code: '47', name: 'Ruote', dims: '16.5/25.4 mm', sizeNote: m('die.size.big', { mm: 25.4 }) },
   { id: '49', code: '49', name: 'Fusilli 3P', dims: '10 mm' },
   { id: '232', code: '232', name: 'Fusilli 2P', dims: '12.6 mm' },
-  { id: '366', code: '366', name: 'Fusillone 3P', dims: '15/20 mm', special: true, sizeNote: '20 mm on PM96/PM120' },
+  { id: '366', code: '366', name: 'Fusillone 3P', dims: '15/20 mm', special: true, sizeNote: m('die.size.big', { mm: 20 }) },
   { id: '50', code: '50', name: 'Caserecce', dims: '8.8 mm' },
   { id: '215', code: '215', name: 'Trecce', dims: '8.8 mm' },
-  { id: 'radiatori', name: 'Radiatori', dims: '17.5/25 mm', sizeNote: '25 mm on PM96/PM120' },
+  { id: 'radiatori', name: 'Radiatori', dims: '17.5/25 mm', sizeNote: m('die.size.big', { mm: 25 }) },
   { id: 'campanelle', name: 'Campanelle', dims: '11.4 mm' },
   { id: 'trottole', name: 'Trottole', dims: '10.4 mm' },
   { id: 'fiori', name: 'Fiori', dims: '', notOn: NOT_LILLO },
@@ -168,7 +170,7 @@ export function electricDies(model: ElectricModel | null): Die[] {
 export function dieLabel(d: Die): string {
   const code = d.code ? `N°${d.code} ` : '';
   const dims = d.dims ? ` ${d.dims}` : '';
-  const flags = [d.included ? 'included' : '', d.special ? 'special order' : '', d.ptfe ? 'PTFE' : '']
+  const flags = [d.included ? t('die.flag.included') : '', d.special ? t('die.flag.special') : '', d.ptfe ? 'PTFE' : '']
     .filter(Boolean)
     .join(', ');
   return `${code}${d.name}${dims}${flags ? ` (${flags})` : ''}`;
