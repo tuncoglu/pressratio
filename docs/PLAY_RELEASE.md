@@ -12,7 +12,7 @@ Console app id `4976268788888229734` (developer id `5715235607958126388`, consol
 | Item | State |
 | --- | --- |
 | Wrapper project | generated in `twa/` (targetSdk 36, minSdk 24, location delegation on) |
-| Bundle | `twa/app-release-bundle.aab` (versionCode 1, 1.0.0) **rolled out to internal testing 2026-10-31** (tester list "HR Buzz testers"; opt-in link https://play.google.com/apps/internaltest/4700102875244577146; no review needed for internal) |
+| Bundle | `twa/app-release-bundle.aab` (versionCode 2, 1.0.1) **rolled out to internal testing 2026-10-31**; versionCode 1 crashed on launch (see Known issue below) (tester list "HR Buzz testers"; opt-in link https://play.google.com/apps/internaltest/4700102875244577146; no review needed for internal) |
 | Upload key | `~/.android-keys/pasta-upload.jks`, alias `pasta-upload`, password in `~/.android-keys/CREDENTIALS.txt`, SHA-256 `01:95:73:31:...:9D:D2`. **Back it up.** |
 | Play app signing key | SHA-256 `6B:5A:6D:5E:E3:BA:FE:0F:8E:B1:1E:57:54:ED:EF:44:4D:C5:6F:C9:50:C1:1B:F5:EF:C9:AD:18:30:65:13:43` (Console > App signing) |
 | Privacy policy page | `public/privacy/index.html` (served at `/privacy/`), linked in the app footer; **deployed 2026-10-31** (Pages project `pasta`, wrangler 4.155.0 direct upload) |
@@ -29,6 +29,10 @@ Console app id `4976268788888229734` (developer id `5715235607958126388`, consol
 
 Deploy command (from a scratch dir, after `npm run build`):
 `CLOUDFLARE_API_TOKEN=$(tr -d '[:space:]' < ~/.cf-token) CLOUDFLARE_ACCOUNT_ID=f217e2d9285193b32d473c8ddb5bc5df npx wrangler@4.155.0 pages deploy <repo>/dist --project-name pasta --branch main`
+
+## Known issue: keep `enableSiteSettingsShortcut` true
+
+With Bubblewrap 1.27.0 + `androidbrowserhelper` 2.7.4, `enableSiteSettingsShortcut: false` omits `ManageDataLauncherActivity` from the manifest, but the library still calls `setComponentEnabledSetting` on it at every launch. The app then crashes immediately (`Component class r0.u does not exist`; `r0.u` is that class after R8). versionCode 1 shipped like this. Keep the flag `true` (it only adds a "Site settings" entry on the app info page). Verified 2026-10-31 by sideloading on a Pixel 10 Pro XL: launches full-screen, no crash.
 
 ## Why the asset links matter
 
