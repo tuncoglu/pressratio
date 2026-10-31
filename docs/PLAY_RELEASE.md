@@ -11,8 +11,8 @@ Console app id `4976268788888229734` (developer id `5715235607958126388`, consol
 
 | Item | State |
 | --- | --- |
-| Wrapper project | generated in `twa/` (targetSdk 36, minSdk 24, location delegation on) |
-| Bundle | `twa/app-release-bundle.aab` (versionCode 2, 1.0.1) **rolled out to internal testing 2026-10-31**; versionCode 1 crashed on launch (see Known issue below) (tester list "HR Buzz testers"; opt-in link https://play.google.com/apps/internaltest/4700102875244577146; no review needed for internal) |
+| Wrapper project | generated in `twa/` (targetSdk 36, minSdk 24, **location delegation off**, see "Location" below) |
+| Bundle | `twa/app-release-bundle.aab` (versionCode 3, 1.0.2) on internal testing and set as the production release 2026-10-31; versionCode 1 crashed on launch (see Known issue below), versionCode 2 had a broken location button (see Location below) (tester list "HR Buzz testers"; opt-in link https://play.google.com/apps/internaltest/4700102875244577146; no review needed for internal) |
 | Upload key | `~/.android-keys/pasta-upload.jks`, alias `pasta-upload`, password in `~/.android-keys/CREDENTIALS.txt`, SHA-256 `01:95:73:31:...:9D:D2`. **Back it up.** |
 | Play app signing key | SHA-256 `6B:5A:6D:5E:E3:BA:FE:0F:8E:B1:1E:57:54:ED:EF:44:4D:C5:6F:C9:50:C1:1B:F5:EF:C9:AD:18:30:65:13:43` (Console > App signing) |
 | Privacy policy page | `public/privacy/index.html` (served at `/privacy/`), linked in the app footer; **deployed 2026-10-31** (Pages project `pasta`, wrangler 4.155.0 direct upload) |
@@ -36,7 +36,16 @@ Deploy command (from a scratch dir, after `npm run build`):
 
 With Bubblewrap 1.27.0 + `androidbrowserhelper` 2.7.4, `enableSiteSettingsShortcut: false` omits `ManageDataLauncherActivity` from the manifest, but the library still calls `setComponentEnabledSetting` on it at every launch. The app then crashes immediately (`Component class r0.u does not exist`; `r0.u` is that class after R8). versionCode 1 shipped like this. Keep the flag `true` (it only adds a "Site settings" entry on the app info page). Verified 2026-10-31 by sideloading on a Pixel 10 Pro XL: launches full-screen, no crash.
 
-## App language (i18n branch, not yet released)
+## Location: leave Trusted Web Activity location delegation off (2026-10-31)
+
+Symptom in versions 1 and 2: "Use my location" always said "Location permission was declined", with no permission prompt. Findings, tested on a Pixel 10 Pro XL (Android 17, current Chrome):
+
+- Bubblewrap 1.27.0 generates `DelegationService` with `android:enabled="@bool/enableNotification"`, which follows `enableNotifications` (false). The location handler lives in that service, so delegation could never work. Enabling the flag (without notifications) registers the service, but Chrome still logs `cr_TWAClient: Unable to request location permission`, never binds the service, and tells the page "denied". Not fixed by that.
+- With `features` empty in `twa-manifest.json` (delegation off), Chrome shows its normal "wants to use your device's location" prompt for the site, which is what the page needs.
+
+So `features` is `{}` and the wrapper declares no location permissions; the site asks through Chrome. Do not turn `locationDelegation` back on without testing on a real device. Data safety still says location is collected and shared with Open-Meteo (the page does that), unchanged. Chrome remembers the answer per site: "Never allow" blocks it until reset in Chrome's site settings (App info > Storage > Manage space opens them).
+
+## App language
 
 The web app is now translated into tr, de, es, fr and it (see the README's Languages section), so the translated store listings below no longer promise a language the app lacks. It ships by deploying the website; no Play release is needed because the TWA just opens the site. The footer links to `/privacy/<lang>/` for non-English users; the Play Console privacy URL stays the English `/privacy/`.
 
@@ -60,7 +69,7 @@ Without `https://pasta.sourdoughcalculator.uk/.well-known/assetlinks.json` listi
 
 ## Data safety answers (to enter in Console)
 
-- Location, approximate **and** precise (the wrapper holds `ACCESS_FINE_LOCATION`/`COARSE_LOCATION`; coordinates are rounded to ~0.01 degree, about 1 km, which is finer than Google's 3 km2 "approximate" threshold): collected, shared with Open-Meteo, ephemeral, optional, app functionality, encrypted in transit.
+- Location, approximate **and** precise (the page asks Chrome for it; since 1.0.2 the wrapper itself no longer holds `ACCESS_FINE_LOCATION`/`COARSE_LOCATION`; coordinates are rounded to ~0.01 degree, about 1 km, which is finer than Google's 3 km2 "approximate" threshold): collected, shared with Open-Meteo, ephemeral, optional, app functionality, encrypted in transit.
 - No personal info, financial, health, messages, photos, contacts, identifiers, ads, accounts. Government app: no. Ads: no. Target audience 18+ like the sister apps.
 - Policy URL: https://pasta.sourdoughcalculator.uk/privacy/
 
