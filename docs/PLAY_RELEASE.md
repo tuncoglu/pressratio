@@ -20,12 +20,13 @@ Console app id `4976268788888229734` (developer id `5715235607958126388`, consol
 | App content (10 declarations) | all done: privacy URL https://pasta.sourdoughcalculator.uk/privacy/, ads No, sign-in No, content rating (IARC, email emre@enftc.co.uk: Everyone / PEGI 3), target audience 18+, Data safety (approximate + precise location: collected + shared with Open-Meteo, ephemeral, optional, app functionality; encrypted in transit; no accounts), advertising ID No, government No, financial none, health none |
 | Store settings | category Food & drink, contact info@sourdoughcalculator.uk + https://pasta.sourdoughcalculator.uk |
 | Default store listing | title, short + full description (plain text, "\u2022" bullets), icon, feature graphic, 7 screenshots saved; icon + feature graphic labelled as AI-generated; status "Ready to send for review" |
-| Sent for review | **no** |
+| Production | versionCode 2 (1.0.1), full rollout, all available countries (set on the Production > Countries/regions tab; the API refuses a release with none). Committed 2026-10-31; Play ran its pre-review checks and sends it for review by itself. The open-testing country changes were bundled into the same submission. |
+| Sent for review | **yes** (2026-10-31, via Publishing overview "Changes in review") |
 
 ## Left to do
 
 1. Install as a tester (opt in via the link above, then install from Play) and confirm the app opens full-screen with no URL bar and the location button works.
-2. Send for review from Publishing overview (user's call), then closed/production.
+2. Wait for Google's review of the production release (Publishing overview > Submission activity), then check the public listing and install from Play.
 
 Deploy command (from a scratch dir, after `npm run build`):
 `CLOUDFLARE_API_TOKEN=$(tr -d '[:space:]' < ~/.cf-token) CLOUDFLARE_ACCOUNT_ID=f217e2d9285193b32d473c8ddb5bc5df npx wrangler@4.155.0 pages deploy <repo>/dist --project-name pasta --branch main`
