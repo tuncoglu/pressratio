@@ -1,0 +1,201 @@
+# Google Play releases for com.sourdough.pasta (the TWA in twa/), started by hand
+# (Actions → Play release → Run workflow).
+#
+# Two jobs, so third-party build code never runs next to the release credentials:
+#   build  runs Gradle (Android Gradle plugin, androidbrowserhelper) and builds an UNSIGNED .aab.
+#          It has NO secrets and NO Play access.
+#   play   installs nothing. In the protected `production` environment (your approval, `main` only)
+#          it signs the bundle with the upload key using the JDK's own jarsigner, checks the
+#          certificate fingerprint, then gets a one-hour Play token from Google through Workload
+#          Identity Federation (no key file anywhere) and runs scripts/play/*.sh.
+#
+# Actions:
+#   status              read-only: list the Play tracks and releases (good first test of the setup)
+#   upload-internal     build, then upload to the internal testing track
+#   promote-production  point production at an already-uploaded versionCode (no build)
+#
+# Version: bump versionCode/versionName in twa/twa-manifest.json (appVersionCode / appVersion) and
+# twa/app/build.gradle together (`bubblewrap update` does both); Play rejects a reused versionCode.
+#
+# Setup: Google side = pool `github`, provider `pressratio-production` (accepts only this
+# repository's id, environment `production`, ref main), service account `play-ci-pasta` (no keys)
+# invited in Play Console for this app only. GitHub side = environment `production` with required
+# reviewer and branch `main`, variables GCP_WIF_PROVIDER + PLAY_SERVICE_ACCOUNT, secrets
+# ANDROID_UPLOAD_KEYSTORE_B64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD.
+name: Play release
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: What to do
+        type: choice
+        options: [status, upload-internal, promote-production]
+        default: status
+      internal_status:
+        description: "upload-internal: release status on the internal track"
+        type: choice
+        options: [completed, draft]
+        default: completed
+      version_code:
+        description: "promote-production: versionCode already on Play (e.g. 4)"
+        type: string
+        required: false
+      version_name:
+        description: "promote-production: its version name (e.g. 1.0.3)"
+        type: string
+        required: false
+      release_notes:
+        description: "promote-production: en-GB release notes (empty = keep the current ones)"
+        type: string
+        required: false
+
+permissions: {}
+
+concurrency:
+  group: play-release
+  cancel-in-progress: false
+
+env:
+  PACKAGE: com.sourdough.pasta
+  # Public certificate fingerprint of the Play upload key (~/.android-keys/pasta-upload.jks).
+  UPLOAD_CERT_SHA256: "01:95:73:31:67:E0:3D:58:5C:8A:86:2C:6C:95:06:B0:02:F4:AD:55:52:DA:E3:E4:B5:63:96:76:0A:1B:9D:D2"
+
+jobs:
+  build:
+    if: inputs.action == 'upload-internal'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    outputs:
+      version_code: ${{ steps.meta.outputs.version_code }}
+      version_name: ${{ steps.meta.outputs.version_name }}
+      sha256: ${{ steps.meta.outputs.sha256 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Android Gradle plugin 8.9 with Gradle 8.11: JDK 17, as Bubblewrap uses locally.
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+
+      # No signingConfig in twa/app/build.gradle, so this bundle is unsigned.
+      - name: Build release bundle
+        run: ./gradlew bundleRelease
+        working-directory: twa
+
+      - name: Version and checksum
+        id: meta
+        working-directory: twa
+        run: |
+          aab=app/build/outputs/bundle/release/app-release.aab
+          cp "$aab" "$RUNNER_TEMP/app-release.aab"
+          code=$(sed -nE 's/^[[:space:]]*versionCode[[:space:]]+([0-9]+).*/\1/p' app/build.gradle | head -1)
+          name=$(sed -nE 's/^[[:space:]]*versionName[[:space:]]+"([^"]+)".*/\1/p' app/build.gradle | head -1)
+          [ -n "$code" ] && [ -n "$name" ] || { echo "could not read versionCode/versionName"; exit 1; }
+          {
+            echo "version_code=$code"
+            echo "version_name=$name"
+            echo "sha256=$(sha256sum "$RUNNER_TEMP/app-release.aab" | cut -d' ' -f1)"
+          } >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: aab-unsigned
+          path: ${{ runner.temp }}/app-release.aab
+          retention-days: 1
+          if-no-files-found: error
+
+  play:
+    needs: build
+    # Runs for status/promote (build skipped) and after a successful build.
+    if: ${{ !cancelled() && (needs.build.result == 'success' || needs.build.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts/play
+
+      - if: inputs.action == 'upload-internal'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: aab-unsigned
+          path: ${{ runner.temp }}/aab
+
+      - name: Sign with the upload key
+        if: inputs.action == 'upload-internal'
+        env:
+          EXPECTED_SHA256: ${{ needs.build.outputs.sha256 }}
+          KEYSTORE_B64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_B64 }}
+          STORE_PW: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PW: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          aab="$RUNNER_TEMP/aab/app-release.aab"
+          echo "$EXPECTED_SHA256  $aab" | sha256sum -c -
+          JB="${JAVA_HOME_21_X64:?no preinstalled JDK 21 on this runner}/bin"
+          ks="$RUNNER_TEMP/upload.jks"
+          trap 'rm -f "$ks"' EXIT
+          printf %s "$KEYSTORE_B64" | base64 -d > "$ks"
+          # The build is unsigned; refuse a bundle that arrives with a signature already.
+          if unzip -Z1 "$aab" | grep -qE '^META-INF/[^/]+\.(SF|RSA|EC|DSA)$'; then
+            echo "bundle is already signed; expected an unsigned build"; exit 1
+          fi
+          "$JB/jarsigner" -keystore "$ks" -storepass:env STORE_PW -keypass:env KEY_PW \
+            -sigalg SHA256withRSA -digestalg SHA-256 "$aab" "$KEY_ALIAS" > /dev/null
+          "$JB/jarsigner" -verify "$aab" > "$RUNNER_TEMP/verify.txt"
+          grep -q 'jar verified.' "$RUNNER_TEMP/verify.txt"
+          got=$("$JB/keytool" -printcert -jarfile "$aab" | sed -n 's/^[[:space:]]*SHA256: //p')
+          [ "$got" = "$UPLOAD_CERT_SHA256" ] || { echo "signed with the wrong certificate: $got"; exit 1; }
+          echo "signed with the upload key ($UPLOAD_CERT_SHA256)"
+
+      - name: Get a Play token (Workload Identity Federation)
+        id: google
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.PLAY_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/androidpublisher
+          create_credentials_file: false
+
+      - name: Run ${{ inputs.action }}
+        working-directory: scripts/play
+        env:
+          PLAY_ACCESS_TOKEN: ${{ steps.google.outputs.access_token }}
+          ACTION: ${{ inputs.action }}
+          INTERNAL_STATUS: ${{ inputs.internal_status }}
+          BUILD_CODE: ${{ needs.build.outputs.version_code }}
+          BUILD_NAME: ${{ needs.build.outputs.version_name }}
+          VERSION_CODE: ${{ inputs.version_code }}
+          VERSION_NAME: ${{ inputs.version_name }}
+          RELEASE_NOTES: ${{ inputs.release_notes }}
+        run: |
+          set -euo pipefail
+          case "$ACTION" in
+            status)
+              bash ./play-status.sh "$PACKAGE" ;;
+            upload-internal)
+              bash ./play-upload.sh "$PACKAGE" "$RUNNER_TEMP/aab/app-release.aab" internal \
+                "$INTERNAL_STATUS" "$BUILD_CODE ($BUILD_NAME)" ;;
+            promote-production)
+              [[ "$VERSION_CODE" =~ ^[0-9]+$ ]] || { echo "version_code must be a number"; exit 1; }
+              [[ "$VERSION_NAME" =~ ^[0-9A-Za-z.+-]+$ ]] || { echo "version_name looks wrong"; exit 1; }
+              bash ./play-production.sh "$PACKAGE" "$VERSION_CODE" "$VERSION_NAME" "$RELEASE_NOTES" ;;
+            *) echo "unknown action $ACTION"; exit 1 ;;
+          esac
