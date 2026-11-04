@@ -80,10 +80,23 @@ cd twa
 export JAVA_HOME=~/.jdks/temurin-17                   # Bubblewrap config; JDK 25 breaks Gradle
 export BUBBLEWRAP_KEYSTORE_PASSWORD=...  BUBBLEWRAP_KEY_PASSWORD=...   # same value, from CREDENTIALS.txt
 npx @bubblewrap/cli@1.27.0 update --skipVersionUpgrade --manifest=twa-manifest.json   # after editing twa-manifest.json
-npx @bubblewrap/cli@1.27.0 build --skipPwaValidation
-bash ~/.config/play-publisher/play-upload.sh ~/.play-key.json com.sourdough.pasta \
-  app-release-bundle.aab internal draft "1 (1.0.0)"
+npx @bubblewrap/cli@1.27.0 build --skipPwaValidation      # local signed build, for sideloading
 ```
+
+**Uploading goes through GitHub Actions** (since 2026-11-04): Actions → **Play release** → Run
+workflow (`.github/workflows/play-release.yml`). No Play service-account key exists anywhere: the
+workflow gets a one-hour token through Workload Identity Federation (pool `github`, provider
+`pressratio-production`, service account `play-ci-pasta`, which only accepts this repo's
+`production` environment on `main`). Every run waits for the owner's approval.
+
+- `status`: read-only list of tracks and releases.
+- `upload-internal`: builds `twa/` with Gradle (unsigned) and uploads to the internal track. Run
+  `bubblewrap update` after bumping `appVersionCode`/`appVersion` in `twa-manifest.json` and commit
+  the regenerated `twa/app/build.gradle` first; the workflow reads the version from there.
+- `promote-production`: points production at an uploaded versionCode, with optional en-GB notes.
+
+The build job has no secrets. The `play` job installs nothing: it signs the bundle with the upload
+key (environment secret, SHA-256 `01:95:73:31…`, checked) using the JDK's jarsigner.
 
 Notes:
 - The version name field in `twa-manifest.json` is `appVersion` (not `appVersionName`; the wrong name is silently ignored and gives an empty versionName). `appVersionCode` must rise for every upload.
