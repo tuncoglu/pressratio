@@ -25,7 +25,7 @@ npm run preview    # serve dist/ locally to try the PWA / offline mode
 
 ## Android app (Google Play)
 
-The app also ships on Google Play as **Pasta & Noodle Calculator** (`com.sourdough.pasta`), a Trusted Web Activity that opens this site full-screen (`twa/`, built with Bubblewrap). It needs `public/.well-known/assetlinks.json` to list the signing certificate, and the policy page at `/privacy/`. Build, signing, listing text, graphics and Console answers are in [`docs/PLAY_RELEASE.md`](docs/PLAY_RELEASE.md) and [`store/LISTING.md`](store/LISTING.md).
+The app also ships on Google Play as **Pasta & Noodle Calculator** (`com.sourdough.pasta`), a Trusted Web Activity that opens this site full-screen (`twa/`, built with Bubblewrap). It needs `public/.well-known/assetlinks.json` to list the signing certificate, and the policy page at `/privacy/`. The page itself shows a "Get the app" card (`src/components/StoreLinks.tsx`, six languages): a Google Play link and an App Store button that opens a "coming soon" dialog with the Safari Add to Home Screen steps. Nothing is counted, and CSS hides it when the page runs installed or inside the Play app (`display-mode: standalone`). This repo has no deploy workflow: `pasta.sourdoughcalculator.uk` is the Cloudflare Pages project `pasta`, deployed by hand (`npm run build`, then `wrangler pages deploy dist --project-name pasta --branch main` after `wrangler login`; a push alone does not deploy). Build, signing, listing text, graphics and Console answers are in [`docs/PLAY_RELEASE.md`](docs/PLAY_RELEASE.md) and [`store/LISTING.md`](store/LISTING.md).
 
 ## Languages
 
