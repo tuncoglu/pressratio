@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Batch, Unit } from './calc/types';
 import { BatchLog } from './components/BatchLog';
 import { Calculator } from './components/Calculator';
+import { StoreLinks } from './components/StoreLinks';
 import { LOCALES, isLocale, setLocale, t } from './i18n';
 import { loadState, saveState, type AppState, type FormState } from './storage';
 
@@ -80,6 +81,10 @@ export default function App() {
           />
         )}
       </main>
+
+      <div className="store-wrap">
+        <StoreLinks />
+      </div>
 
       <footer className="legal">
         <label className="lang">

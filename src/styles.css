@@ -232,3 +232,33 @@ details.adjust summary { font-weight: 700; font-size: 1.1rem; min-height: 44px; 
 
 .ambient .check { display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 500; }
 .ambient .check input { width: 24px; height: 24px; accent-color: var(--brand); flex: none; }
+
+/* "Get the app": a Google Play link and an App Store button for the iPhone app that is not out yet.
+   Same look as redcardlive.com. Hidden once the page runs as an installed app, the Play app included. */
+.store-wrap { padding: 12px 12px 0; }
+.store-links { display: grid; gap: 8px; }
+.store-label { margin: 0; color: var(--muted); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.store-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.store-button {
+  display: inline-flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px;
+  min-height: 48px; min-width: 150px; padding: 6px 16px; border: 2px solid var(--line); border-radius: 8px;
+  background: var(--card); color: var(--ink); font: inherit; text-decoration: none; text-align: left; cursor: pointer;
+}
+.store-button:hover { border-color: var(--ink); }
+.store-small { font-size: 0.7rem; color: var(--muted); line-height: 1.2; }
+.store-big { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+.store-dialog {
+  max-width: min(460px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow-y: auto;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); padding: 24px;
+}
+.store-dialog::backdrop { background: rgb(0 0 0 / 0.6); }
+.store-dialog h2 { font-size: 1.25rem; margin: 0 0 10px; }
+.store-dialog h3 { font-size: 0.95rem; margin: 18px 0 8px; }
+.store-dialog p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.55; }
+.store-dialog ol { margin: 0 0 14px; padding-left: 20px; font-size: 0.9rem; line-height: 1.6; }
+.store-dialog form { margin: 18px 0 0; }
+.store-dialog .store-close {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; font: inherit;
+  font-weight: 700; border: 0; border-radius: 10px; background: var(--brand); color: var(--brand-ink); cursor: pointer;
+}
+@media (display-mode: standalone) { .store-wrap { display: none; } }

@@ -6,6 +6,7 @@ import type { Batch } from '../calc/types';
 import { DEFAULT_FORM } from '../storage';
 import { BatchLog } from './BatchLog';
 import { Calculator } from './Calculator';
+import { PLAY_URL, StoreLinks } from './StoreLinks';
 
 const noop = () => {};
 // React SSR separates adjacent text nodes with <!-- -->; drop them so assertions read naturally.
@@ -249,5 +250,17 @@ describe('render smoke tests', () => {
     );
     expect(out).toContain('You added 8 g extra water');
     expect(out).toContain('4/5 vs 2/5');
+  });
+});
+
+describe('get the app', () => {
+  it('links to the Android app on Google Play and explains the iPhone route', () => {
+    const out = html(<StoreLinks />);
+    expect(PLAY_URL).toContain('id=com.sourdough.pasta');
+    expect(out).toContain(`href="${PLAY_URL.replace(/&/g, '&amp;')}"`);
+    expect(out).toContain('Google Play');
+    expect(out).toContain('App Store');
+    expect(out).toContain('The iPhone app is coming soon');
+    expect(out).toContain('Open pasta.sourdoughcalculator.uk in Safari');
   });
 });
